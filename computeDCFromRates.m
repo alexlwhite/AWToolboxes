@@ -1,4 +1,4 @@
-function [d, c, c2, hitR, FAR, corrected] = computeDCFromRates(hitR, FAR, nPres, nAbst, rateCorr)
+function [d, c, c2, beta, hitR, FAR, corrected] = computeDCFromRates(hitR, FAR, nPres, nAbst, rateCorr)
 %Compute signal detection theory variables from hit and false alarm rates and trial numbers
 % by Alex White, 2014
 % 
@@ -16,6 +16,7 @@ function [d, c, c2, hitR, FAR, corrected] = computeDCFromRates(hitR, FAR, nPres,
 % - c is criterion as distance from 0 (mean of noise distribution, depends
 % only on false alarms
 % - c2 is criterion as distance from the neutral point (d/2)
+% - beta is criterion expresssed as the likelihood ratio of sensory evidence at c: (p(c | present) / p(c | absent)
 % - hitR is the hit rate 
 % - FAR is the false alarm rate 
 % - corrected, whether or not a correction had to be applied to 100% hits
@@ -86,7 +87,7 @@ c=norminv(1-FAR);
 %is d/2. This is equivalent to c-d/2 (using the first c)
 c2= -0.5*(norminv(hitR) + norminv(FAR));
 
-%Third, beta: the likelihood ratio at c (at the moment, not returned)
+%Third, beta: the likelihood ratio at c 
 beta = normpdf(c,d,1)/normpdf(c,0,1); 
 
 %other transformations relevant to these criterion measues: 

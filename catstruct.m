@@ -64,8 +64,12 @@ function A = catstruct(varargin)
 %   4.0 (dec 2013) fixed problem with unique due to version differences in
 %                  ML. Unique(...,'last') is no longer the deafult.
 %                  (thanks to Isabel P)
+% 
+% 18 January 2017: ALW replaced narginchk with nargchk to avoid warnings
+% in Matlab 2016b
 
-narginchk(1,Inf) ;
+%error(nargchk(1,Inf,nargin)) ;
+narginchk(1,inf); 
 N = nargin ;
 
 if ~isstruct(varargin{end}),
