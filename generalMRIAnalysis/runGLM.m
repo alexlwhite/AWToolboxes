@@ -1,4 +1,4 @@
-%% function [betas, rSqrs, regressors, badVox] = runGLM(data, PRT, conds, hrf, doLinPred, avgVoxPSCBeforeGLM, doPlot, voiName) 
+%% function [betas, rSqrs, regressors, badVox] = runGLM(data, PRT, conds, hrf, doLinPred, motionParams, motionParamNames, censorTRs_HighFD, avgVoxPSCBeforeGLM, doPlot, voiName) 
 % run a basic GLM on MRI data 
 % 
 % Inputs: 
@@ -16,6 +16,12 @@
 %     (2) h, a vector of hemodynamic response values equal in size to t. 
 % - doLinPred: a Boolean variable determining whether to add a
 %   linear trend nuisance predictor to the regression.  
+% - motionParams: a TxP matrix of head motion parameters to be included as nuissance regressors. 
+%   T is the number of TRs and P is the number of motion paramteres to be included in
+%   the GLM as regressors. Input an empty matrix here if no motion nuissance regressors needed.
+% - motionParamNames: a 1XP cell array of names of motion parameters
+% - censorTRs_HighFD: boolean, whether to "censor" TRs with FD over 0.9,
+%   following Siegel et al, HBM 2014
 % - avgVoxPSCBeforeGLM: a Boolean variable determing whether to average
 %   percent signal change over voxels bere running GLM. Set to false if you
 %   want beta weights for individual voxels in the output, true if you're
@@ -40,7 +46,7 @@
 % - badVox: vector of indices of "bad" voxels with timecourses that are all
 %   zeros
 
-function [betas, rSqrs, regressors, badVox] = runGLM(data, PRT, conds, hrf, doLinPred, avgVoxPSCBeforeGLM, doPlot, voiName) 
+function [betas, rSqrs, regressors, badVox] = runGLM(data, PRT, conds, hrf, doLinPred, motionParams, motionParamNames, censorTRs_HighFD, avgVoxPSCBeforeGLM, doPlot, voiName) 
 
 nCond = length(conds);
 numTRs = size(data,1);
@@ -144,17 +150,38 @@ end
 XX = [XX,ones(numTRs,1)];
 regressors = cat(2,regressors,{'DC'});
 
+%Then add motion param regressors: 
+if ~isempty(motionParams)
+   %Normalize motion params to have a max of 1
+   motionParamsNorm = motionParams./repmat(max(abs(motionParams),[],1),size(motionParams,1),1);
+   XX = [XX, motionParamsNorm];
 
+   regressors = cat(2,regressors,motionParamNames);
+end
+
+%Then add mask to "censor" TRs with high FD 
+if censorTRs_HighFD && ~isempty(motionParams)
+   FDThresh = 0.9; 
+   
+   fdCol = find(strcmp(motionParamNames,'FD')); 
+   if ~isempty(fdCol)
+      badTRs = motionParams(:,fdCol)>FDThresh;
+      XX = [XX, badTRs];
+      regressors = cat(2,regressors,{'FDoverThresh'});
+   end
+    
+end
 % Each column of this matrix XX contains the unscaled
 % predicted response to each isolated stimulus condition (or nuisance
 % predictor)
-if doPlot && ~doPlot %never mind lets not do this 
+if doPlot & ~doPlot %never mind lets not do this 
     figure; hold on
     plot(1:numTRs,XX,'LineWidth',2);
     xlabel('TR');
     ylabel('PSC');
     title('Predictors');
     legend(regressors);
+    keyboard
 end
 
 %% Do regression 
