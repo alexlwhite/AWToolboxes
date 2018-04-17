@@ -14,9 +14,9 @@
 % - thresh is the threshold estimate
 % - trialsCounted is the number of trials used in the estimate, after
 % ignoring trials just after resets
+% - threshSD is the standard deviation of stimulus intensities used in the
+% computation of hte threshold 
 %
-% This takes the median of intensity levels used on trials in which the
-% step size was stable.
 %
 % The staircase halves the step size after the first n reversals (ss.revsToHalveI), then
 % keeps it stable until some number  reverals have happened

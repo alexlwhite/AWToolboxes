@@ -3,7 +3,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%     Alex L White, December 2014        %%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+%
+% Note: this script doesn't work if you run it. It's merely meant to list 
+% all the commands needed to run a staircase 
 
 %% Set parameters, into a structure "stair"
 stair.t                   = 0.5;   %desired maximum reduced hit rate (MRHR = HR-FAR). 0.5 is a good choice for intermediate performance. See Kaernbach (1990). 

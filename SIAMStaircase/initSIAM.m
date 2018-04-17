@@ -11,7 +11,7 @@
 % We assume that signal and noise trials are equally likely 
 % - startStep is the starting intensity step size. 
 % - startI is the starting intensity level 
-% - iSet is the set of possible stimulus levels, if lenght(iSet)>2.
+% - iSet is the set of possible stimulus levels, if length(iSet)>2.
 %   If iSet is a vector of length 2, it is taken instead as the minimum and 
 %   maximum stimulus levels and the intensity level is otherwise free to wander. 
 % - revsToHalveI is a vector of reversal numbers after which to halve the step size
