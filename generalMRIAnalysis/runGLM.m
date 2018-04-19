@@ -201,6 +201,11 @@ for vi=1:numVox
     predTC = XX*betas(vi,:)';
     rSqrs(vi) = corr(vdat,predTC)^2;
     
+    if mod(vi,round(numVox/10))==0
+        pDone = round(100*vi/numVox); 
+        fprintf('(runGLM) Computed regression for %i%% of voxels\n',pDone);
+    end
+    
     %just to check, compute it another way by hand
 %     SSTot = sum((vdat-mean(vdat)).^2);
 %     SSRes =  sum((vdat - predTC).^2);
