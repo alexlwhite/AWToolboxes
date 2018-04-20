@@ -5,7 +5,9 @@
 % files, in combination with the Matlab BVQX tools. 
 % 
 % Inputs: 
-% - vtc: a BVQX vtc object 
+% - vtc: a BVQX vtc object. Or if not a full object, it just needs to be a
+% strutrure with the following fields: Resolution; VTCData or VTCDataSize;
+% XStart; YStart; and ZStart. 
 % - voi: a BVQX voi object 
 % - vmrBBox: the structure returned by vmr.BoundingBox, for the anatomical
 %   VMR to which these data are aligned. If this is not input, it is by
@@ -45,7 +47,13 @@ for vc=1:nVOIs
     
     % get VTC info
     vres = vtc.Resolution;
-    vtcsz = size(vtc.VTCData);    
+    if isfield(vtc,'VTCData')
+       vtcsz = size(vtc.VTCData);    
+    elseif isfield(vtc,'VTCDataSize')
+        vtcsz = vtc.VTCDataSize;
+    else
+        error('(getVTCFunctionalVoxelsFromVOI) Missing vtc.VTCData or vtc.VTCDataSize');
+    end
     voff = [vtc.XStart, vtc.YStart, vtc.ZStart];
     
     % Translate from anatomical to functional space
