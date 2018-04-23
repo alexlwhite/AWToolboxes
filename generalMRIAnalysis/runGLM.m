@@ -1,4 +1,4 @@
-%% function [betas, rSqrs, regressors, badVox] = runGLM(data, PRT, conds, hrf, doLinPred, motionParams, motionParamNames, censorTRs_HighFD, avgVoxPSCBeforeGLM, doPlot, voiName) 
+%% function [betas, rSqrs, conds, regressors, badVox] = runGLM(data, PRT, conds, hrf, doLinPred, motionParams, motionParamNames, censorTRs_HighFD, avgVoxPSCBeforeGLM, doPlot, voiName) 
 % run a basic GLM on MRI data 
 % 
 % Inputs: 
@@ -41,12 +41,22 @@
 %   and N is the number of predictors. 
 % - rSqrs: a Vx1 vector of r-squared values, reflecting quality of model
 %   fits. 
-% - predictorNames = a 1xN cell array of character strings indicating the
+% - conds: the vector of condition indices from eventSequence that were
+%   actually used. This is the intersection of the input "conds" and the
+%   values that are actually in eventSequence. So, some conditions you
+%   requested may not have been included in the GLM (and are therefore not in
+%   betas) because they werent included in the scan. 
+% - regressors = a 1xN cell array of character strings indicating the
 %   names of each predictor. 
 % - badVox: vector of indices of "bad" voxels with timecourses that are all
 %   zeros
 
-function [betas, rSqrs, regressors, badVox] = runGLM(data, PRT, conds, hrf, doLinPred, motionParams, motionParamNames, censorTRs_HighFD, avgVoxPSCBeforeGLM, doPlot, voiName) 
+function [betas, rSqrs, conds, regressors, badVox] = runGLM(data, PRT, conds, hrf, doLinPred, motionParams, motionParamNames, censorTRs_HighFD, avgVoxPSCBeforeGLM, doPlot, voiName) 
+
+%Make sure that we only use conds that are actually in the PRT. Otherwise
+%some design matrix columns will be all 0s, which makes no sense. 
+usedConds = unique(PRT.eventSequence); 
+conds = intersect(conds, usedConds); 
 
 nCond = length(conds);
 numTRs = size(data,1);
