@@ -2,18 +2,22 @@
 % Compute standard error of the mean: SD/sqrt(N)
 % 
 % Inputs: 
-% ds: a matrix of data. This can be any size, but the last dimension must
-% be the variable you want to take the SEM over. For instance, the last
-% dimension could be subjects in a within-subject psychology experiment. 
+% - ds: a matrix of data. This can be any size. 
+% - dim: the dimension over which to take the SEM over. The default is the last 
+%   dimension. For instance, the last dimension could be subjects in a within-subjects experiment. 
 % 
 % Outputs: 
-% SEM: the standard error of the mean: the standard deviation divided by
-% the square root of the number of measurements. 
+% - SEM: the standard error of the mean: the standard deviation divided by
+%   the square root of the number of measurements. 
 % 
 % by Alex White, 2018, at the University of Washington. 
 % 
 
-function SEM = standardError(ds) 
+function SEM = standardError(ds,dim) 
 
-N = size(ds,ndims(ds));
-SEM = std(ds,0,ndims(ds))/sqrt(N);
+if nargin<2 || ~exist('dim','var')
+    dim = ndims(ds);
+end
+
+N = size(ds,dim);
+SEM = std(ds,0,dim)/sqrt(N);
