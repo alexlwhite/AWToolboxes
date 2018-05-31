@@ -45,6 +45,7 @@ end
 areSame = strcmp(C2{1},C1{1}); 
 if ~all(areSame(1:(nameI-1)))
     error('(combineVOIs): Two VOIs have different header info!');
+    
 end
 
 %Use BVQX to load in the VOIs and extract voxel info
