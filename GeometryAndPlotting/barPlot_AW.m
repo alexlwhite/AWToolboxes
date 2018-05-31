@@ -45,6 +45,16 @@ if ~isfield(opt,'legendLoc')
     opt.legendLoc = 'NorthWest';
 end
 
+if ~isfield(opt,'doYLab')
+    opt.doYLab = true;
+end
+
+if ~isfield(opt,'doYTickLab')
+    opt.doYTickLab = true;
+end
+if ~isfield(opt,'doLegend')
+    opt.doLegend = true;
+end
 
 n1 = size(ds,1);
 n2 = size(ds,2);
@@ -84,7 +94,7 @@ end
 
 xlims = [0 ctr+opt.xAxisMargin];
 
-figure; hold on;
+hold on;
 handles = zeros(1,n2);
 
 if prod(opt.ylims)<0
@@ -115,15 +125,17 @@ set(gca,'XTick',l1Centers,'YTick',opt.yticks);
 if isfield(opt,'xTickLabs')
     set(gca,'XTickLabel',opt.xTickLabs); 
 end
-
+if ~opt.doYTickLab
+    set(gca,'YTickLabel',{});
+end
 if isfield(opt,'xLab')
     xlabel(opt.xLab);
 end
-if isfield(opt,'yLab')
+if isfield(opt,'yLab') && opt.doYLab
     ylabel(opt.yLab); 
 end
 
-if isfield(opt,'legendLabs')
+if isfield(opt,'legendLabs') && opt.doLegend
     legend(handles,opt.legendLabs,'Location',opt.legendLoc);
 end
 
