@@ -89,4 +89,7 @@ voi1.ClearObject;
 if exist('clearbvxqobjects')
     clearbvqxobjects({voi1});
 end
+
+%close txt files
+fclose(fid1); fclose(fidNew);
     

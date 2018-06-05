@@ -109,3 +109,6 @@ voi2.ClearObject;
 if exist('clearbvxqobjects')
     clearbvqxobjects({voi1,voi2});
 end
+
+%% close txt files
+fclose(fid1); fclose(fid2); fclose(fidNew);
