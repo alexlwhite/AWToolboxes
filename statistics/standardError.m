@@ -1,4 +1,4 @@
-%% function se = standardError(ds) 
+%% function se = standardError(ds, dim) 
 % Compute standard error of the mean: SD/sqrt(N)
 % 
 % Inputs: 
@@ -8,7 +8,8 @@
 % 
 % Outputs: 
 % - SEM: the standard error of the mean: the standard deviation divided by
-%   the square root of the number of measurements. 
+%   the square root of the number of measurements. NaNs are treated as
+%   missing values and ignored. 
 % 
 % by Alex White, 2018, at the University of Washington. 
 % 
@@ -19,5 +20,6 @@ if nargin<2 || ~exist('dim','var')
     dim = ndims(ds);
 end
 
-N = size(ds,dim);
-SEM = std(ds,0,dim)/sqrt(N);
+%N: count how many non-nan measurements there are 
+N = sum(~isnan(ds),ndims(ds));
+SEM = nanstd(ds,0,dim)./sqrt(N);
