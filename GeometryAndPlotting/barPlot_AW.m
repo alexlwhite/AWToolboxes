@@ -33,7 +33,11 @@ if ~isfield(opt,'errorBarWidth')
 end
 
 if ~isfield(opt,'ylims')
-    drng=[min(ds(:)-eb(:)) max(ds(:)+eb(:))]; 
+    if ~isempty(eb)
+        drng = [min(ds(:)-eb(:)) max(ds(:)+eb(:))]; 
+    else
+        drng = [min(ds(:)) max(ds(:))];
+    end
     opt.ylims = drng + [-1 1]*0.1*diff(drng);
 end
 
