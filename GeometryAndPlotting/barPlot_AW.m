@@ -9,8 +9,26 @@
 % - eb: Values for error bars on the bars. Same dimensions of ds. Set to
 %       empty vector [] is none. 
 % 
-% - opt: structure with various plotting options. 
-%       
+% - opt: structure with various plotting options: 
+%    barWidth
+%    edgeLineWidth
+%    errorBarWidth
+%    fillColors
+%    edgeColors
+%    errorBarColors
+%    level1Sep
+%    level2Sep
+%    xAxisMargin
+%    xLab
+%    xTickLabs
+%    ylims
+%    yLab
+%    yticks
+%    doLegend
+%    legendLabs
+%    legendLoc
+%    
+     
 function barPlot_AW(ds, eb, opt)
 
 if ~isfield(opt,'barWidth')
@@ -45,10 +63,6 @@ if ~isfield(opt,'yticks')
     opt.yticks = linspace(opt.ylims(1), opt.ylims(2), 5);
 end
 
-if ~isfield(opt,'legendLoc')
-    opt.legendLoc = 'NorthWest';
-end
-
 if ~isfield(opt,'doYLab')
     opt.doYLab = true;
 end
@@ -58,6 +72,9 @@ if ~isfield(opt,'doYTickLab')
 end
 if ~isfield(opt,'doLegend')
     opt.doLegend = true;
+end
+if ~isfield(opt,'legendLoc')
+    opt.legendLoc = 'NorthWest';
 end
 
 n1 = size(ds,1);
