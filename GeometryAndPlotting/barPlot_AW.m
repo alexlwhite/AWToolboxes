@@ -142,7 +142,10 @@ for i1 = 1:n1
        
         %bar
         handles(i2) = fill(vertx(:), verty(:), squeeze(opt.fillColors(i1,i2,:))', 'EdgeColor', squeeze(opt.edgeColors(i1,i2,:))', 'LineWidth', opt.edgeLineWidth);
-        
+         
+        %do it again in reverse order to avoid the annoying diagonal white line 
+        fill(flipud(vertx(:)), flipud(verty(:)), squeeze(opt.fillColors(i1,i2,:))', 'EdgeColor', squeeze(opt.edgeColors(i1,i2,:))', 'LineWidth', opt.edgeLineWidth);
+       
         %error bar
         if doErrorBar
             if symmetricErrorBar
