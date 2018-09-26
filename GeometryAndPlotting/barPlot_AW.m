@@ -6,8 +6,12 @@
 %       The first dimension defines groups that are separted more widely 
 %       The second dimension defines values within a group 
 % 
-% - eb: Values for error bars on the bars. Same dimensions of ds. Set to
-%       empty vector [] is none. 
+% - eb: Values for error bars on the bars. Set to empty vector [] if none. 
+%       If the error bars are meant to be symmetric (e.g., +/- 1 std error), 
+%       then eb must have the same dimensions as ds. 
+%       If the error bars are not necessarily symmetric (eg 95% confidence
+%       intervals), then eb must be 3 dimensional, where the 3rd dimension
+%       has the lower and upper bounds of each error bar. 
 % 
 % - opt: structure with various plotting options: 
 %    barWidth
@@ -50,9 +54,16 @@ if ~isfield(opt,'errorBarWidth')
     opt.errorBarWidth = 1;
 end
 
+if isempty(eb)
+    doErrorBar = false;
+else
+    doErrorBar = true;
+    symmetricErrorBar = ndims(eb)<3;
+end
+
 if ~isfield(opt,'ylims')
     if ~isempty(eb)
-        drng = [min(ds(:)-eb(:)) max(ds(:)+eb(:))]; 
+        drng = [min([min(ds(:)) min(eb(:))]) max([max(ds(:)) max(eb(:))])];
     else
         drng = [min(ds(:)) max(ds(:))];
     end
@@ -130,11 +141,15 @@ for i1 = 1:n1
         verty=[by fliplr(by)];
        
         %bar
-        handles(i2) = fill(vertx(:), verty(:),squeeze(opt.fillColors(i1,i2,:))','EdgeColor',squeeze(opt.edgeColors(i1,i2,:))','LineWidth',opt.edgeLineWidth);
+        handles(i2) = fill(vertx(:), verty(:), squeeze(opt.fillColors(i1,i2,:))', 'EdgeColor', squeeze(opt.edgeColors(i1,i2,:))', 'LineWidth', opt.edgeLineWidth);
         
         %error bar
-        if ~isempty(eb)
-            plot([1 1]*barCenters(i1,i2),ds(i1,i2)+[-1 1]*eb(i1,i2),'-','Color',squeeze(opt.errorBarColors(i1,i2,:)),'LineWidth',opt.errorBarWidth);
+        if doErrorBar
+            if symmetricErrorBar
+                plot([1 1]*barCenters(i1,i2), ds(i1,i2)+[-1 1]*eb(i1,i2), '-', 'Color', squeeze(opt.errorBarColors(i1,i2,:)), 'LineWidth', opt.errorBarWidth);
+            else
+                plot([1 1]*barCenters(i1,i2), squeeze(eb(i1,i2,:)),'-','Color', squeeze(opt.errorBarColors(i1,i2,:)), 'LineWidth', opt.errorBarWidth);
+            end
         end
     end
 end
