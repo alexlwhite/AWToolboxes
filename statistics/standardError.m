@@ -21,5 +21,5 @@ if nargin<2 || ~exist('dim','var')
 end
 
 %N: count how many non-nan measurements there are 
-N = sum(~isnan(ds),ndims(ds));
+N = sum(~isnan(ds),dim);
 SEM = nanstd(ds,0,dim)./sqrt(N);
