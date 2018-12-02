@@ -97,14 +97,20 @@ if ~isfield(opt,'fillColors')
     for i1=1:n1
         opt.fillColors(i1,:,:) = l2FillColors;
     end
+elseif n2==1 && size(opt.fillColors,3)==1 %reshape fillColors 
+    opt.fillColors = reshape(opt.fillColors,[n1 n2 3]);
 end
 
 if ~isfield(opt,'edgeColors')
     opt.edgeColors = opt.fillColors;
+elseif n2==1 && size(opt.edgeColors,3)==1 %reshape edgeColors 
+    opt.edgeColors = reshape(opt.edgeColors,[n1 n2 3]);
 end
 
 if ~isfield(opt,'errorBarColors')
     opt.errorBarColors = opt.edgeColors;
+elseif n2==1 && size(opt.errorBarColors,3)==1 %reshape errorBarColors 
+    opt.errorBarColors = reshape(opt.errorBarColors,[n1 n2 3]);
 end
 
 %Set bar centers
