@@ -31,9 +31,14 @@
 %    doLegend
 %    legendLabs
 %    legendLoc
-%    
-     
-function barPlot_AW(ds, eb, opt)
+%    lev1ForLegend (which value of level 1 to use for handles for legend)
+% 
+% Outputs: 
+% - barCenters: NxM matrix of bar centers, where N is the size of dimension
+% 1 in the data and M is the size of dimension 2
+% 
+
+function barCenters = barPlot_AW(ds, eb, opt)
 
 if ~isfield(opt,'barWidth')
     opt.barWidth = 0.2;
@@ -87,7 +92,9 @@ end
 if ~isfield(opt,'legendLoc')
     opt.legendLoc = 'NorthWest';
 end
-
+if ~isfield(opt,'lev1ForLegend')
+    opt.lev1ForLegend = size(ds,1);
+end
 n1 = size(ds,1);
 n2 = size(ds,2);
 
@@ -133,7 +140,7 @@ end
 xlims = [0 ctr+opt.xAxisMargin];
 
 hold on;
-handles = zeros(1,n2);
+handles = zeros(n1,n2);
 
 if prod(opt.ylims)<0
     plot(xlims,[0 0],'k-');
@@ -147,7 +154,7 @@ for i1 = 1:n1
         verty=[by fliplr(by)];
        
         %bar
-        handles(i2) = fill(vertx(:), verty(:), squeeze(opt.fillColors(i1,i2,:))', 'EdgeColor', squeeze(opt.edgeColors(i1,i2,:))', 'LineWidth', opt.edgeLineWidth);
+        handles(i1,i2) = fill(vertx(:), verty(:), squeeze(opt.fillColors(i1,i2,:))', 'EdgeColor', squeeze(opt.edgeColors(i1,i2,:))', 'LineWidth', opt.edgeLineWidth);
          
         %do it again in reverse order to avoid the annoying diagonal white line 
         fill(flipud(vertx(:)), flipud(verty(:)), squeeze(opt.fillColors(i1,i2,:))', 'EdgeColor', squeeze(opt.edgeColors(i1,i2,:))', 'LineWidth', opt.edgeLineWidth);
@@ -181,7 +188,7 @@ if isfield(opt,'yLab') && opt.doYLab
 end
 
 if isfield(opt,'legendLabs') && opt.doLegend
-    legend(handles,opt.legendLabs,'Location',opt.legendLoc);
+    legend(handles(opt.lev1ForLegend,:),opt.legendLabs,'Location',opt.legendLoc);
 end
 
 
