@@ -85,10 +85,10 @@ zLo = norminv((1-CIrange/100)/2);
 zHi = norminv((1+CIrange/100)/2);
 
 zClo = z0 + (z0+zLo)/(1-a*(z0+zLo));
-bcaLo = NormalCumulative(zClo,0,1);
+bcaLo = normcdf(zClo,0,1);
 
 zChi = z0 + (z0+zHi)/(1-a*(z0+zHi));
-bcaHi = NormalCumulative(zChi,0,1);
+bcaHi = normcdf(zChi,0,1);
 
 
 CI(1) = prctile(bootstrapStat,100*bcaLo);
