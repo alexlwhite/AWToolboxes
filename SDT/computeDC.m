@@ -81,6 +81,6 @@ c=norminv(1-FAR);
 %is d/2. This is equivalent to c-d/2 (using the first c)
 c2= -0.5*(norminv(hitR) + norminv(FAR));
 
-%Third, beta: the likelihood ratio at c (at the moment, not returned)
+%Third, beta: the likelihood ratio at c  
 beta = normpdf(c,d,1)/normpdf(c,0,1); 
 
