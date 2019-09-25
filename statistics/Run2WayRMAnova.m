@@ -1,4 +1,4 @@
-%stats = Run2WayRMAnova(ds, file) 
+%stats = Run2WayRMAnova(ds, file, factnames) 
 %
 % Runs a repeated-measures two-way anova on data in matrix "ds"
 % uses the function rm_anova2, taken from the Matlab exchange 
