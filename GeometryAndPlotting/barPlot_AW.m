@@ -27,6 +27,7 @@
 %    xTickLabs
 %    ylims
 %    yLab
+%    doYLab
 %    yticks
 %    doLegend
 %    legendLabs
@@ -146,10 +147,18 @@ if prod(opt.ylims)<0
     plot(xlims,[0 0],'k-');
 end
 
+%set the bottom of the bars (for cleaner plotting):
+if opt.ylims(1)>0
+    barYMin = opt.ylims(1); 
+else 
+    barYMin = 0;
+end
+
+
 for i1 = 1:n1
     for i2 = 1:n2
         bx = barCenters(i1,i2)+[-0.5 0.5]*opt.barWidth;
-        by = [0 ds(i1, i2)]; 
+        by = [barYMin ds(i1, i2)]; 
         vertx=[bx; bx];
         verty=[by fliplr(by)];
        
