@@ -52,10 +52,6 @@ elseif hitR==1
     corrected=true;
 end
 
-%Deal with case when there are too few trials, or FA rate is 1 or 0
-if ~exist('rateCorr','var')
-end
-
 if nAbst<5
     if nAbst>0
         if FAR==1, FAR=0.99;
@@ -74,9 +70,6 @@ end
 
 
 d=norminv(hitR)-norminv(FAR);
-
-%don't accept d' less than 0. 
-%if d<0, d=0; end;
 
 %Criterion: 
 %First, just the z-score of the correct rejection rate. Simple, on same
