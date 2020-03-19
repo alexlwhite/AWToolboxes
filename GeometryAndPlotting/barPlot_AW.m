@@ -77,8 +77,21 @@ if ~isfield(opt,'ylims')
 end
 
 if ~isfield(opt,'yticks')
-    opt.yticks = linspace(opt.ylims(1), opt.ylims(2), 5);
+    nTicks = 5;
+    tickDiff = diff(opt.ylims)/(nTicks-1);
+    
+    orderOfMag = round(log10(tickDiff));
+    
+    logDiff = 1 - orderOfMag;
+    ts = tickDiff*10^logDiff;
+    ts = round(ts);
+    tickDiff = ts/(10^logDiff);
+    
+    startTick = tickDiff*round(opt.ylims(1)/tickDiff);
+    
+    opt.yticks = startTick:tickDiff:opt.ylims(2);
 end
+
 
 if ~isfield(opt,'doYLab')
     opt.doYLab = true;
