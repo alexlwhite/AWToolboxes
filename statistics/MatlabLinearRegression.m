@@ -9,9 +9,12 @@ trueInt = -.8;
 Y = trueSlope*X + trueInt + randn(N,1)*.3;
 
 %% Least-squares regression:
+%P is a design matrix, with the first column being a constant offest
+%(intercept), and the second column being the x-values that the slope will
+%be multiplied with
 P = [ones(N,1) X];
 
-B = P\Y;
+B = P\Y; %B is the beta weights, the solution to the equation P*B = Y; 
 
 intercept = B(1);
 slope = B(2);
@@ -23,7 +26,9 @@ slope = B(2);
 [rhoS, pvalS] = corr(X,Y,'type','Spearman')
 
 %% compute R-squared
+%y-values predicted by the model 
 Y_hat = intercept + slope*X;
+%equivalently: Y_hat = P*B;
 
 resids =Y_hat - Y;
 SSResid = sum(resids.^2);
