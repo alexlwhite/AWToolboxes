@@ -1,4 +1,4 @@
-%% function barPlot_AW(ds, eb, opt)
+%% function barCenters = barPlot_AW(ds, eb, opt)
 % Alex White's function to make a bar plot. 
 % 
 % Inputs: 
@@ -64,7 +64,7 @@ if isempty(eb)
     doErrorBar = false;
 else
     doErrorBar = true;
-    symmetricErrorBar = ndims(eb)<3;
+    symmetricErrorBar = numel(eb)==numel(ds);
 end
 
 if ~isfield(opt,'ylims')
@@ -192,7 +192,8 @@ for i1 = 1:n1
     end
 end
 
-xlim(xlims); ylim(opt.ylims);
+xlim(xlims); 
+ylim(opt.ylims);
 
 l1Centers = mean(barCenters,2); 
 set(gca,'XTick',l1Centers,'YTick',opt.yticks); 
