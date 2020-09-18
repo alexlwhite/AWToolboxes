@@ -40,6 +40,13 @@ if length(horizontalSpace)==1
     horizontalSpace = ones(1,nCols-1)*horizontalSpace;
 end
 
+if length(relativeHeights)==1
+    relativeHeights = ones(1, nRows)*relativeHeights;
+end
+if length(relativeWidths)==1
+    relativeWidths = ones(1, nCols)*relativeWidths;
+end
+
 availableHeight =  (1-topMargin-bottomMargin-sum(verticalSpace));
 subplotHeights = availableHeight*relativeHeights/sum(relativeHeights);
 
