@@ -192,8 +192,6 @@ for i1 = 1:n1
     end
 end
 
-xlim(xlims); 
-ylim(opt.ylims);
 
 l1Centers = mean(barCenters,2); 
 set(gca,'XTick',l1Centers,'YTick',opt.yticks); 
@@ -210,8 +208,11 @@ if isfield(opt,'yLab') && opt.doYLab
     ylabel(opt.yLab); 
 end
 
+xlim(xlims); 
+ylim(opt.ylims);
+
 if isfield(opt,'legendLabs') && opt.doLegend
-    legend(handles(opt.lev1ForLegend,:),opt.legendLabs,'Location',opt.legendLoc);
+    legend(handles(opt.lev1ForLegend,:),opt.legendLabs,'Location',opt.legendLoc,'AutoUpdate','off');
 end
 
 
