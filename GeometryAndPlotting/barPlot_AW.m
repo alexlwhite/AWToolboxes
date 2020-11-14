@@ -32,6 +32,7 @@
 %    doLegend
 %    legendLabs
 %    legendLoc
+%    legendTitle
 %    lev1ForLegend (which value of level 1 to use for handles for legend)
 % 
 % Outputs: 
@@ -58,6 +59,9 @@ if ~isfield(opt,'edgeLineWidth')
 end
 if ~isfield(opt,'errorBarWidth')
     opt.errorBarWidth = 1;
+end
+if ~isfield(opt, 'legendTitle')
+    opt.legendTitle = '';
 end
 
 if isempty(eb)
@@ -113,7 +117,7 @@ n1 = size(ds,1);
 n2 = size(ds,2);
 
 if ~isfield(opt,'fillColors')
-    l2FillColors = hsv2rgb([linspace(0.2, 0.8, n2)' ones(n2,1)*0.8 ones(n2,1)*0.7]);
+    l2FillColors = hsv2rgb([linspace(0.3, 0.8, n2)' ones(n2,1)*0.8 ones(n2,1)*0.7]);
     opt.fillColors = zeros(n1,n2,3);
     for i1=1:n1
         opt.fillColors(i1,:,:) = l2FillColors;
@@ -212,7 +216,11 @@ xlim(xlims);
 ylim(opt.ylims);
 
 if isfield(opt,'legendLabs') && opt.doLegend
-    legend(handles(opt.lev1ForLegend,:),opt.legendLabs,'Location',opt.legendLoc,'AutoUpdate','off');
+    leg = legend(handles(opt.lev1ForLegend,:),opt.legendLabs,'Location',opt.legendLoc,'AutoUpdate','off');
+
+    if ~isempty(opt.legendTitle)
+        title(leg, opt.legendTitle);
+    end
 end
 
 
