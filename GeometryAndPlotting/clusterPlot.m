@@ -7,7 +7,7 @@
 %       The second dimension defines values within a group 
 % 
 % 
-% - opt: structure with various plotting options: 
+% - opt: structure with various plotting options: NEEDS UPDATING
 %    barWidth
 %    meanLineWidth
 %    errorBarWidth
@@ -34,7 +34,7 @@
 % 1 in the data and M is the size of dimension 2
 % 
 
-function [barCenters, opt] = clusterPlot_AW(ds, opt)
+function [barCenters, opt] = clusterPlot(ds, opt)
 
 n1 = size(ds,1);
 n2 = size(ds,2);
@@ -54,7 +54,7 @@ end
         
 
 if ~isfield(opt,'markSz')
-    opt.markSz = 10;
+    opt.markSz = 100;
 end
 if ~isfield(opt, 'symbols')
     opt.symbols = repmat({'o'}, n1, n2);
@@ -71,18 +71,31 @@ end
 if ~isfield(opt,'xAxisMargin')
     opt.xAxisMargin = 0.3;
 end
+if ~isfield(opt, 'meanSymbol')
+    opt.meanSymbol = 'd'; %'-' means a line 
+end
 if ~isfield(opt,'meanLineWidth')
-    opt.meanLineWidth = 3;
+    opt.meanLineWidth = 4;
 end
+if ~isfield(opt,'meanDotSize')
+    opt.meanDotSize = 10;
+end
+
 if ~isfield(opt, 'nVertBands')
-    opt.nVertBands = 10;
+    opt.nVertBands = 50;
 end
+
 if ~isfield(opt, 'doErrorBar')
     opt.doErrorBar = true;
 end
 if ~isfield(opt, 'symmetricErrorBar')
     opt.symmetricErrorBar = true;
 end
+if ~isfield(opt, 'errorBarType')
+    %possibilities: 'box', 'line'
+    opt.errorBarType = 'line';
+end
+
 
 if ~isfield(opt,'errorBarWidth')
     opt.errorBarWidth = 1;
@@ -94,8 +107,11 @@ if ~isfield(opt,'errorBarColors')
     opt.errorBarColors = zeros(size(ds,1), size(ds,2), 3);
 end
 
-if ~isfield(opt, 'connectIndivPts')
-    opt.connectIndivPts = true;
+if ~isfield(opt, 'connectLev1IndivPts')
+    opt.connectLev1IndivPts = false;
+end
+if ~isfield(opt, 'connectLev2IndivPts')
+    opt.connectLev2IndivPts = true;
 end
 if ~isfield(opt, 'indivPtConnectColor')
     opt.indivPtConnectColor = 0.8*ones(1,3);
@@ -135,8 +151,8 @@ elseif n2==1 && size(opt.edgeColors,3)==1 %reshape edgeColors
     opt.edgeColors = reshape(opt.edgeColors,[n1 n2 3]);
 end
 
-if ~isfield(opt, 'meanLineColors')
-    opt.meanLineColors = opt.edgeColors*0.8;
+if ~isfield(opt, 'meanColors')
+    opt.meanColors = opt.edgeColors*0.7;
 end
 
 %Set bar centers and collect all points 
@@ -200,7 +216,7 @@ for i1 = 1:n1
     end
 end
 
-pointHorizSep = 0.9*(opt.barWidth)/(maxN);
+pointHorizSep = 0.5*(opt.barWidth)/(maxN);
 
 %assign each dot an x and y coordinate 
 allX = cell(size(ds));
@@ -212,11 +228,7 @@ for i1 = 1:n1
             if thisN(ei)>0
                 xis = edges(ei)<=ds{i1,i2} & ds{i1,i2}<edges(ei+1);
                 wid = thisN(ei)*pointHorizSep;
-                try
-                    allX{i1,i2}(xis) = barCenters(i1,i2)+linspace(-wid/2, wid/2, thisN(ei));
-                catch
-                    keyboard
-                end
+                allX{i1,i2}(xis) = barCenters(i1,i2)+linspace(-wid/2, wid/2, thisN(ei));
             end
         end
     end
@@ -231,37 +243,77 @@ if prod(opt.ylims)<0
 end
 
 %if requesed, plot lines connecting matched data points 
-if opt.connectIndivPts 
+if opt.connectLev1IndivPts 
    ys = []; xs = [];
    for i1=1:n1
        ys = [ys cell2mat(ds(i1,:))];
-       %xs = [xs barCenters(i1,:)];
        xs = [xs cell2mat(allX(i1,:))];
    end
    
    for pti=1:size(ys,1)
        plot(xs(pti,:), ys(pti,:), '-','Color',opt.indivPtConnectColor);
    end
+elseif opt.connectLev2IndivPts
+    for i1=1:n1
+        xs = cell2mat(allX(i1,:));
+        ys = cell2mat(ds(i1,:));
+        for pti=1:size(ys,1)
+            plot(xs(pti,:), ys(pti,:), '-','Color',opt.indivPtConnectColor);
+        end
+    end
 end
 
 for i1 = 1:n1
     for i2 = 1:n2
-        bx = barCenters(i1,i2)+[-0.5 0.5]*opt.barWidth;
-        by = ones(1,2)*nanmean(ds{i1, i2}); 
-      
+       
        
         %dots
-        handles(i1,i2)  = plot(allX{i1,i2}, ds{i1,i2}, opt.symbols{i1,i2}, 'MarkerFaceColor',squeeze(opt.fillColors(i1,i2,:))', 'MarkerEdgeColor', squeeze(opt.edgeColors(i1,i2,:))');
+        hdot  = scatter(allX{i1,i2}, ds{i1,i2});
+        hdot.Marker = opt.symbols{i1,i2};
+        hdot.SizeData = opt.markSz;
+        hdot.MarkerFaceColor = squeeze(opt.fillColors(i1,i2,:))';
+        hdot.MarkerEdgeColor = squeeze(opt.edgeColors(i1,i2,:))';
+
+        if isfield(opt, 'dotFaceAlpha')
+            hdot.MarkerFaceAlpha = opt.dotFaceAlpha;
+        end
         
-        %line for mean
-        plot(bx, by, '-', 'Color', squeeze(opt.meanLineColors(i1,i2,:)), 'LineWidth',opt.meanLineWidth);
-                
-        %error bar
+        handles(i1,i2) = hdot;
+        
+        if strcmp(opt.meanSymbol, '-')
+            %line for mean
+             bx = barCenters(i1,i2)+[-0.5 0.5]*opt.barWidth;
+             by = ones(1,2)*nanmean(ds{i1, i2});
+            plot(bx, by, '-', 'Color', squeeze(opt.meanColors(i1,i2,:)), 'LineWidth',opt.meanLineWidth);
+        else
+            plot(barCenters(i1,i2), nanmean(ds{i1, i2}), opt.meanSymbol, 'Color', squeeze(opt.meanColors(i1,i2,:)), 'MarkerSize',opt.meanDotSize);
+        end
+        %error bar as a box! 
         if opt.doErrorBar
             if opt.symmetricErrorBar
-                plot([1 1]*barCenters(i1,i2), nanmean(ds{i1,i2})+[-1 1]*standardError(ds{i1,i2}), '-', 'Color', squeeze(opt.errorBarColors(i1,i2,:)), 'LineWidth', opt.errorBarWidth);
+                if strcmp(opt.errorBarType, 'line')
+                    plot([1 1]*barCenters(i1,i2), nanmean(ds{i1,i2})+[-1 1]*standardError(ds{i1,i2}), '-', 'Color', squeeze(opt.errorBarColors(i1,i2,:)), 'LineWidth', opt.errorBarWidth);
+                elseif strcmp(opt.errorBarType, 'box')
+                    rectWid = opt.barWidth;
+                    rectHei = 2*standardError(ds{i1,i2});
+                    rectX = barCenters(i1,i2)-rectWid/2; %lower left corner
+                    rectY = nanmean(ds{i1,i2}-rectHei/2);
+
+                    rectangle('Position', [rectX rectY rectWid rectHei],'EdgeColor', [0 0 0]);
+                end
             else
-                plot([1 1]*barCenters(i1,i2), boyntonBootstrap(@mean,ds{i1,i2},1000,68.27,true),'-','Color', squeeze(opt.errorBarColors(i1,i2,:)), 'LineWidth', opt.errorBarWidth);
+                
+                CI = boyntonBootstrap(@mean,ds{i1,i2},1000,68.27,true);
+
+                if strcmp(opt.errorBarType, 'line')
+                    plot([1 1]*barCenters(i1,i2), CI,'-','Color', squeeze(opt.errorBarColors(i1,i2,:)), 'LineWidth', opt.errorBarWidth);
+                elseif strcmp(opt.errorBarType, 'box')
+                    rectWid = opt.barWidth;
+                    rectX = barCenters(i1,i2)-rectWid/2;
+                    rectHei = abs(diff(CI));
+                    rectY = min(CI);
+                    rectangle('Position', [rectX rectY rectWid rectHei],'EdgeColor', [0 0 0]);
+                end
             end
         end
     end
