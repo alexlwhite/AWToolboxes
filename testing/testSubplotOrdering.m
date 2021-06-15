@@ -1,5 +1,5 @@
-nRows = 8;
-nCols = 8; 
+nRows = 14;
+nCols = 15; 
 
 nC = nRows*nCols;
 
@@ -18,7 +18,7 @@ for c = 1:nC
 end
 
 %% 
-figure; 
-subplot(nRows, nCols, [1 5 9]);
-text(0, 0, '[1 5 9]');
+% figure; 
+% subplot(nRows, nCols, [1 5 9]);
+% text(0, 0, '[1 5 9]');
 
