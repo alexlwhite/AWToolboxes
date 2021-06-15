@@ -19,8 +19,8 @@ function [d, c, c2, beta, hitR, FAR, corrected] = computeDC(pres, resp)
 % - hitR is the hit rate 
 % - FAR is the false alarm rate 
 % - corrected, whether or not a correction had to be applied to 100% hits
-% or 0% false alarms. That's done by adding 1 error. 
-
+% or 0% false alarms. That's done by adjusting the rate to what it would be if he 
+% had run twice as many trials and got 1 different response. 
 
 
 hits=(pres & resp); 
