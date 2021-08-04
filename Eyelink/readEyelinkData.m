@@ -42,7 +42,7 @@ if strcmp(fname(end-3:end), '.edf')
     [err,tmp]=dos(['edf2asc ' fname], '-echo');
     rehash path
     if ~exist(fname2, 'file')  % error reading file
-        fprintf(tmp); fprintf('\n error reading edf\n');
+        fprintf(tmp); fprintf('\n error running edf2asc\n');
         result=struct();
         return;
     end
@@ -60,7 +60,7 @@ line=0;
 trial=0;
 trialstart=0;
 nancount=0;
-maxnans=3000; %max 3 seconds blink recorded.
+maxnans=300000; %max 300 seconds blink recorded.
 %chars allowed in messages
 goodChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890.,_; ';
 
@@ -87,20 +87,8 @@ try
                 result(trial).blink=[];
                 result(trial).messages = {};
                 result(trial).messageTimes = [];
-                trialstart=fscanf(fid,'%d',1);
+                trialstart=t; %fscanf(fid,'%d',1);
                 fprintf('\rTrial %d   ',trial);
-            elseif(msg=='B')
-                
-                %not sure what this does
-                tmp=find(val==':');
-                if ~isempty(tmp)
-                    [msg,tmp2,tmp2,tmp2]=sscanf(val(tmp+1:end),'%s',1);
-                    val=val((tmp+tmp2):end);
-                else
-                    [result(trial).B tmp tmp tmp]= sscanf(val,'%d',1);
-                    [result(trial).T tmp tmp tmp]= sscanf(val((tmp+2):end),'%d',1);
-                    msg='BT';
-                end
             end
             if trial>0
                 fn = removeNonalphanumericChars(msg);
@@ -113,7 +101,7 @@ try
                 result(trial).messages = cat(1, result(trial).messages, {wholeMessage});
                 result(trial).messageTimes = [result(trial).messageTimes; t-trialstart];
             end
-            %start of this line is a timestamp
+        %start of this line is a timestamp
         elseif any(token(1)=='0123456789') && trial>0
             %pull out the gaze data
             gazeDat=fscanf(fid,'%g',3)';
@@ -139,8 +127,9 @@ try
             if length(t)==9
                 result(trial).saccade=[result(trial).saccade; t - [trialstart trialstart 0 0 0 0 0 0 0]];
             else
-                fprintf(['?']); disp(t);
-            end;
+                fprintf(['saccade ending data is odd?']); disp(t);
+                result(trial).saccade=[result(trial).saccade; [t NaN(1, 9-length(t))] - [trialstart trialstart 0 0 0 0 0 0 0]];
+            end
             %fprintf('s');
         elseif strcmp(token, 'EBLINK') && trial>0
             tmp=fscanf(fid,'%s',1); t=fscanf(fid,'%g',3)';
@@ -168,6 +157,7 @@ try
 catch
     e=lasterror;
     fprintf('%s\nin %s\nline %d\n',e.message, e.stack(1).file, e.stack(1).line);
+    keyboard
 end
 fclose(fid);
 %% delete ASC file
