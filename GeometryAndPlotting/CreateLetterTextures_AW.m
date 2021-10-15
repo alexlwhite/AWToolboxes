@@ -39,7 +39,7 @@ end
    canvasRect=[0 0 o.targetPix o.targetPix]*o.targetHeightOverWidth;
 % end
 black=0;
-white=255;
+white=o.bgColor; %was 255
 if o.readAlphabetFromDisk
 
    % Read from disk into "savedAlphabet".
