@@ -2,7 +2,7 @@ function [d, c, c2, beta, hitR, FAR, corrected] = computeDCFromRates(hitR, FAR, 
 %Compute signal detection theory variables from hit and false alarm rates and trial numbers
 % by Alex White, 2014
 % 
-% Usage: [d, c, c2, corrected] = computeDCFromRates(hitR, FAR, nPres, nAbs, rateCorr)
+% Usage: [d, c, c2, beta, hitR, FAR, corrected] = computeDCFromRates(hitR, FAR, nPres, nAbs, rateCorr)
 % Input: 
 % - hitR is the hit rate, between 0 and 1
 % - FAR is the false alarm rate, between 0 and 1
