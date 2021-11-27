@@ -1,0 +1,63 @@
+%script to test dual-task model 
+close all; clear;
+
+%%Serial model
+
+modelType = 1; %1=serial, 2=parallel
+
+%Single-Task Ag values from the real data
+singleTaskLeftAg = 0.76;
+singleTaskRightAg = 0.88;
+
+
+%Extra capacity parameter: on what proportion of dual-task trials both
+%sides can be processed
+pDualBoth = 0.1; 
+
+%Congruency effects implemented by pProcessSide2ByMistake:
+%On some proportion of trials, attend to the right (side 2) only, but without
+%realizing it, so report that side even if asked about the right 
+%pProcessSide2ByMistake ranges from -.5 (flip to side 1 half the time) to 0.5 (flip to side 2)
+pFlip2Side2 = 0.1; 
+
+%Bias towards one side in dual-task (on trials when only 1 is attended) 
+%implemented by dualTaskAttnBias: 
+%Ranges from 0 to 1, with 0 meaning never attend to the left, 0.5 being
+%perfectly balanced, and 1 meaning always attend to the left
+%For now let's assume that it's related to pProcessSide2ByMistake
+dualTaskAttnBias = 0.5-pFlip2Side2*2;
+dualTaskAttnBias(dualTaskAttnBias>1) = 1; 
+dualTaskAttnBias(dualTaskAttnBias<0) = 0; 
+
+%take into account that if there is some accidental flipping, the 'true'
+%underlying Ag value would be different:
+if pFlip2Side2>0
+    trueLeftAg = (singleTaskLeftAg - pFlip2Side2*0.5) / (1-pFlip2Side2);
+    trueRightAg = singleTaskRightAg;
+else
+   trueRightAg = (singleTaskRightAg + pFlip2Side2*0.5) / (1+pFlip2Side2);
+   trueLeftAg = singleTaskLeftAg;
+end
+
+attndLeftMean = AgToDprime(trueLeftAg); 
+attndRightMean = AgToDprime(trueRightAg);
+
+Ag = GeneralDualTaskAnalyticModel(modelType,attndLeftMean, attndRightMean, pFlip2Side2, dualTaskAttnBias, pDualBoth);
+
+congruencyEffects = Ag(:,:,3)-Ag(:,:,2)
+
+%Note: if pFlip2Side2 == 0, only negative correlations with 2 targets, at
+%0 correlation with 0 targets. But if pFlip2Side2>0, negative correlation
+%with >0 targets (especially for side2only) and positive corr with 0
+%targets. Same for pFlip2Side2<0, but most negative corr for side1only.
+%% Parallel model 
+modelType = 2; %1=serial, 2=parallel
+
+extraCapacity = 0; 
+
+Ag  = GeneralDualTaskModel(modelType,attndLeftMean, attndRightMean, pFlip2Side2, dualTaskAttnBias, extraCapacity);
+
+congruencyEffects = Ag(:,:,3)-Ag(:,:,2)
+
+%Note: the parallel model can also hae a complex pattern of negative and
+%positive congruency effects if pFlip2Side2~=0.
