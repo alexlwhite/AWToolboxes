@@ -1,4 +1,4 @@
-%function [pProcessBoth, pTask1First] =  plotAOCWithPredictions(as,es,plotOpt)
+%function [pProcessBoth, pTask1First, hSing] =  plotAOCWithPredictions(as,es,plotOpt)
 %
 % This function plots an AOC based on single- and dual-task accuracy. It
 % also fits a "generalized" serial model to the data. The diagonal line in
@@ -40,10 +40,11 @@
 % - pTask1First: parameter of generalized serial model: proportion of
 %   trials when task 1 is processed 'first', meaning that only task 1 is
 %   procesed on (1-pProcessBoth)*pTask1First proportion of trials. 
-%
+% - hSing: handle to the single-task points
+% 
 % by Alex White, 2017
 
-function [pProcessBoth, pTask1First] = plotAOCWithPredictions(as,es,plotOpt)
+function [pProcessBoth, pTask1First, hSing] = plotAOCWithPredictions(as,es,plotOpt)
 
 if ~isfield(plotOpt,'markSz')
     plotOpt.markSz = 12;
@@ -84,6 +85,10 @@ if ~isfield(plotOpt,'edgeColors')
 end
 if ~isfield(plotOpt,'fillColors')
     plotOpt.fillColors = [hsv2rgb([0.6 0.7 0.4]); ones(1,3)];
+end
+
+if ~isfield(plotOpt, 'predLineColor')
+    plotOpt.predLineColor =  plotOpt.edgeColors(2,:);
 end
 
 %% setup axes
@@ -161,14 +166,14 @@ fixedA2s =  DPrimeToAg(fixedD2s);
 %% Plot the box for unlimited capacity model
 hold on;
 
-plot([as(1,2) as(1,2)],[axlims(1) as(1,1)],'k--','LineWidth',datLineWidth);
-plot([axlims(1) as(1,2)], [as(1,1) as(1,1)],'k--','LineWidth',datLineWidth);
+plot([as(1,2) as(1,2)],[axlims(1) as(1,1)],'k--','LineWidth',datLineWidth,'Color',plotOpt.predLineColor);
+plot([axlims(1) as(1,2)], [as(1,1) as(1,1)],'k--','LineWidth',datLineWidth, 'Color',plotOpt.predLineColor);
 
 %% Plot the serial model prediction of straight line:
-plot([axlims(1) as(1,2)], [as(1,1) axlims(1)],'k-','LineWidth',datLineWidth);
+plot([axlims(1) as(1,2)], [as(1,1) axlims(1)],'k-','LineWidth',datLineWidth, 'Color',plotOpt.predLineColor);
 
 %% Plot fixed-capacity parallel prediction curve:
-plot(fixedA1s,fixedA2s,'-','Color','k','LineWidth',datLineWidth); %dualEdgeColor*0.8);
+plot(fixedA1s,fixedA2s,'-','Color','k','LineWidth',datLineWidth, 'Color',plotOpt.predLineColor); %dualEdgeColor*0.8);
 
 %% Solve for best-fitting serial model
 [pProcessBoth, pTask1First, slope, intercept] = AnalyticDualTaskSerialModel(as(1,:),as(2,:), false);
