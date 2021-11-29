@@ -8,12 +8,19 @@
 %
 %
 % - opt: structure with various plotting options: NEEDS UPDATING
-%    barWidth
-%    meanLineWidth
-%    errorBarWidth
 %    fillColors
 %    edgeColors
+%    barWidth
+%    meanLineWidth
+%    connectLev1IndivPts
+%    connectLev2IndivPts
+%    indivPtConnectColor
+%    errorBarWidth
+%    doErrorBar
 %    errorBarColors
+%    errorBarCI
+%    errorBarType
+%    symmetricErrorBar
 %    level1Sep
 %    level2Sep
 %    xAxisMargin
@@ -28,7 +35,11 @@
 %    legendLoc
 %    legendTitle
 %    lev1ForLegend (which value of level 1 to use for handles for legend)
-%
+%    markSz 
+%    meanSymbol
+%    meanLineWidth
+%    meanDotSize
+%    nVertBands
 % Outputs:
 % - barCenters: NxM matrix of bar centers, where N is the size of dimension
 % 1 in the data and M is the size of dimension 2
@@ -188,7 +199,7 @@ elseif opt.ylims(1)>yrng(1) || opt.ylims(2)<yrng(2)
 end
 
 if ~isfield(opt,'yticks')
-    nTicks = 5;
+    nTicks = 6;
     tickDiff = diff(opt.ylims)/(nTicks-1);
     
     orderOfMag = round(log10(tickDiff));
