@@ -1,4 +1,4 @@
-%% function [medX, medY, goodTimes, blinkCutTimes, noBlinkIntervals, pDataRemainAfterBlinkCut] = computeGazePosAndBlinks(time1, time2, edf, params)
+%% function [medX, medY, goodTimes, blinkCutTimes, noBlinkIntervals, pDataRemainAfterBlinkCut] = computeGazePosAndBlinks(time1, time2, edf)
 % This function finds blinks in a sequence of gaze positions and computes
 % the median gaze position (excluding periods with blinks). Blinks are
 % detected because pupil size is 0.
@@ -7,8 +7,7 @@
 % - time1: starting time to analyze, in units used by edf.Samples.time
 % - time2: ending time to analyze, also in units used by edf.Samples.time
 % - edf: structure returned by Edf2Mat
-% - params: structure with analysis pareters, including fields preBlinkCut
-%    and postBlinkCut
+%
 %
 % Outputs
 % - medPos: 1x2 vector, median [horizontal, vertical] gaze position, in PIXELS (from edf.Samples.posX)
@@ -26,7 +25,7 @@
 % - pDataRemainAfterBlinkCut: proportion of data remaining after cut out blinks.
 %
 % Note: the edf file aslo has blinksEvents.eBlink!
-function [medPos, meanPos, goodTimes, blinkCutTimes, noBlinkIntervals, pDataRemainAfterBlinkCut] = computeGazePosAndBlinks(time1, time2, edf, params)
+function [medPos, meanPos, goodTimes, blinkCutTimes, noBlinkIntervals, pDataRemainAfterBlinkCut] = computeGazePosAndBlinks(time1, time2, edf)
 
 doPlot = false;
 
@@ -40,8 +39,6 @@ msPerSample = 1000/samrat; %milliseconds per sample
 eyeX = edf.Samples.posX(intime);
 eyeY = edf.Samples.posY(intime);
 pupSz = edf.Samples.pupilSize(intime);
-
-%postnsTrue = params.DPP*[eyeX-params.scrCen(1) -(eyeY-params.scrCen(2))];
 
 %detect blinks
 isBlink = pupSz == 0;
@@ -89,7 +86,7 @@ if blinkCount>0
         thisBlinkTimes = minT:maxT;
         
         yvels = [1; diff(eyeY(thisBlinkTimes))/msPerSample];
-        zeroVelTimes = thisBlinkTimes(abs(yvels)<0.5); %sometimes the velocity cross 0 but due to sampling doesnt quite reach 0, so we'll take 0.5 deg per ms as cutoff
+        zeroVelTimes = thisBlinkTimes(abs(yvels)<0.5); %sometimes the velocity cross 0 but due to sampling doesnt quite reach 0, so we'll take 0.5 pix per ms as cutoff
         
         %time when the blink distortions started: latest time before signal
         %disappears when y velocity was 0
@@ -101,7 +98,11 @@ if blinkCount>0
             zeroTimesBeforeShut = min(zeroVelTimes - blinkOnsetIs(bci));
         end
         startCutBuffer = max(zeroTimesBeforeShut);
-        startCutT = blinkOnsetIs(bci)+startCutBuffer;
+        if ~isempty(startCutBuffer)
+            startCutT = blinkOnsetIs(bci)+startCutBuffer;
+        else
+            startCutT = blinkOnsetIs(bci);
+        end
         
         %time when the blink distortions stopped: earliest time after
         %singal disappears when y velocity was 0
@@ -112,7 +113,11 @@ if blinkCount>0
         end
         
         endCutBuffer = min(zeroTimesAfterShut);
-        endCutT = blinkOffsetIs(bci)+endCutBuffer;
+        if ~isempty(endCutBuffer)
+            endCutT = blinkOffsetIs(bci)+endCutBuffer;
+        else
+            endCutT = blinkOffsetIs(bci);
+        end
         
         if doPlot
             figure(newfig); clf;
@@ -148,7 +153,11 @@ if blinkCount>0
             end
         else
             uniqueBlinkCount = uniqueBlinkCount+1;
-            blinkCutTimes(uniqueBlinkCount, :) = [times(startCutT) times(endCutT)];
+            try
+                blinkCutTimes(uniqueBlinkCount, :) = [times(startCutT) times(endCutT)];
+            catch
+                keyboard
+            end
         end
         
     end
