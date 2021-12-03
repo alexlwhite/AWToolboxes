@@ -29,6 +29,11 @@ function [medPos, meanPos, goodTimes, blinkCutTimes, noBlinkIntervals, pDataRema
 
 doPlot = false;
 
+%some things are hard-coded: 
+beforeBlinkBuffer = 100; %ms before blink starts to consider cutting (eventually depends on eye velocity)
+afterBlinkBuffer = 120; %ms after blink starts to consider cutting (eventually depends on eye velocity)
+maxYVelForCut = 0.5; % cutoff y-velocity in pix/ms to consider as when the eye starts or stops moving due to blink artifact 
+
 intime = edf.Samples.time>=time1 & edf.Samples.time<time2;
 
 times = edf.Samples.time(intime);
@@ -77,16 +82,16 @@ if doPlot, newfig = figure; end
 if blinkCount>0
     for bci=1:blinkCount
         
-        minT = floor(blinkOnsetIs(bci)-100/msPerSample);
+        minT = floor(blinkOnsetIs(bci)-beforeBlinkBuffer/msPerSample);
         minT(minT<1) = 1;
         
-        maxT = ceil((blinkOffsetIs(bci)+120/msPerSample));
+        maxT = ceil((blinkOffsetIs(bci)+afterBlinkBuffer/msPerSample));
         maxT(maxT>length(times)) = length(times);
         
         thisBlinkTimes = minT:maxT;
         
         yvels = [1; diff(eyeY(thisBlinkTimes))/msPerSample];
-        zeroVelTimes = thisBlinkTimes(abs(yvels)<0.5); %sometimes the velocity cross 0 but due to sampling doesnt quite reach 0, so we'll take 0.5 pix per ms as cutoff
+        zeroVelTimes = thisBlinkTimes(abs(yvels)<maxYVelForCut); %sometimes the velocity cross 0 but due to sampling doesnt quite reach 0, so we'll take 0.5 pix per ms as cutoff
         
         %time when the blink distortions started: latest time before signal
         %disappears when y velocity was 0
