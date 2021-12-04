@@ -46,7 +46,7 @@ eyeY = edf.Samples.posY(intime);
 pupSz = edf.Samples.pupilSize(intime);
 
 %detect blinks
-isBlink = pupSz == 0;
+isBlink = pupSz <= 0;
 
 %find onset and offset of blinks
 blinkOn = false; blinkCount = 0;
