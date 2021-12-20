@@ -469,11 +469,12 @@ xlim(xlims);
 ylim(opt.ylims);
 
 if isfield(opt,'legendLabs') && opt.doLegend
-    [leg, legendIcons] = legend(handles(opt.lev1ForLegend,:),opt.legendLabs,'Location',opt.legendLoc,'AutoUpdate','off');
+    [legH] = legend(handles(opt.lev1ForLegend,:),opt.legendLabs,'Location',opt.legendLoc,'AutoUpdate','off');
     
     if ~isempty(opt.legendTitle)
-        title(leg, opt.legendTitle);
+        legH.Title.String = opt.legendTitle;
     end
+    legendIcons = []; %not sure what these are in more, matlab changed
 else
     legendIcons = [];
 end
