@@ -1,5 +1,4 @@
-function [CI,sampleStat,bootstrapStat] = boyntonBootstrap(myStatistic,x,nReps,CIrange,BCFlag)
-% [CI,sampleStat] = bootstrap(myStatistic,x,[nReps],[CIrange],[BCFlag])
+%% [CI,sampleStat,bootstrapStat] = boyntonBootstrap(myStatistic,x,nReps,CIrange,BCFlag)
 %
 % Calculates a confidence interval on the statistic (function handle
 % 'myStatistic' using a nonparametric bootstrap and the bias-corrected
@@ -7,7 +6,7 @@ function [CI,sampleStat,bootstrapStat] = boyntonBootstrap(myStatistic,x,nReps,CI
 %
 % Inputs:
 %    myStatistic:       a handle to a function that takes in a vector and
-%                       returns a scalar (like 'mean' or 'std')
+%                       returns a scalar (like '@mean' or '@std')
 %
 %   x                   sample vector for generating the statistic and its
 %                       confidence intervals
@@ -29,6 +28,9 @@ function [CI,sampleStat,bootstrapStat] = boyntonBootstrap(myStatistic,x,nReps,CI
 %         based on  Efron and Tibshirani's "Introductcion to the Bootsrap" 
 %        (Chapman & Hall/CRC, 1993, pages 178-201)
 % 04/12/18 Edited by ALW to return bootstrapStat
+%
+function [CI,sampleStat,bootstrapStat] = boyntonBootstrap(myStatistic,x,nReps,CIrange,BCFlag)
+
 
 %%
 % Deal with defaults
