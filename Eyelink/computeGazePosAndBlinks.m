@@ -192,8 +192,9 @@ else
     noBlinkIntervals = [time1 time2];
 end
 
-%exclude intervals
-if any(diff(noBlinkIntervals,1,2)<=0)
+%exclude no blink intervals with 0 duration 
+goodDurs = 1+diff(noBlinkIntervals,1,2);
+if any(goodDurs<1)
     keyboard
 end
 
