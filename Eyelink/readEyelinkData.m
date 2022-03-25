@@ -90,9 +90,10 @@ try
                 trialstart=t; %fscanf(fid,'%d',1);
                 fprintf('\rTrial %d   ',trial);
             end
+            fn = removeNonalphanumericChars(msg);
+            val(uint8(val)<31)=[]; % remove control characters from message
             if trial>0
-                fn = removeNonalphanumericChars(msg);
-                val(uint8(val)<31)=[]; % remove control characters from message
+                
                 %store message "value" and time
                 result(trial).([fn '_m']) = val;
                 result(trial).([fn '_t']) = t-trialstart;
@@ -100,6 +101,8 @@ try
                 %add just a cell array of the whole messages
                 result(trial).messages = cat(1, result(trial).messages, {wholeMessage});
                 result(trial).messageTimes = [result(trial).messageTimes; t-trialstart];
+            elseif strcmp(fn, 'MODE') %in case "mode" messaage about sample rate, tracked eye, etc is only saved once before any trial
+                initialModeMessage = val;
             end
         %start of this line is a timestamp
         elseif any(token(1)=='0123456789') && trial>0
@@ -173,7 +176,11 @@ for trial=1:length(result)
     result(trial).pupilSize = result(trial).gazeData(:,4);
     
     %extract some facts about recording
-    modeMsg = result(trial).MODE_m;
+    try
+        modeMsg = result(trial).MODE_m;
+    catch
+        modeMsg = initialModeMessage;
+    end
     spaces = find(modeMsg == ' ');
     modeWords = {};
     for spi=1:length(spaces)
