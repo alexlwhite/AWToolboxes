@@ -23,10 +23,14 @@
 
 function [minDistToFixed, nearestFixedPSampTask1] = compareToFixedCapacityModel(as)
 
+%can't accept 100% correct 
+as(as==1) = 0.999;
+
 %% Predictions of fixed-capacity parallel model:
 dualx = as(2,2); dualy=as(2,1);
 
 singleAs = as(1,:); %data as area under ROC for single task conditions left and right
+
 %order needs flip:
 singleAs = fliplr(singleAs);
 singleDs = AgToDprime(singleAs); %convert to d'
@@ -61,7 +65,8 @@ nearestFixedPSampTask1 = pSamplesOnTask1(pointI);
 %% set distance to be negative if dual-task performance is WORSE than predicted by fixed-capacity model 
 nearestX = fixedA1s(pointI); nearestY = fixedA2s(pointI); 
 %see which is farther from the origin 
-nearestRad = sqrt(nearestX^2 + nearestY^2); 
+nearestRad = sqrt(nearestX^2 + nearestY^2);
+
 dataRad = sqrt(dualx^2 + dualy^2); 
 if dataRad<nearestRad
     minDistToFixed = -1*minDistToFixed;
