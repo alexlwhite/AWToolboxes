@@ -1,3 +1,37 @@
+%% function [tStat, bayesFactor, CI, sigStars] = diffStats(diffs, statsF, BCFlag, CIRange, nReps, compVal)
+% run statistics on a vector of differences (or really any numbers). Common
+% usage is to determine statistics on the mean difference between two
+% experimental conditions. This function computes and prints the result of
+% a t-test, Bayes Factor, and bootstrapped confidence interval. 
+% 
+% Inputs: 
+% - diffs: a 1xN vector of measurments, typically within-subjects differences
+%   between two conditions. N is the number of measurements. 
+% - statsF: handle to a file where the results will be printed. If
+%   statsF==1, results get printed to the command window. 
+% - BCFlag: this is a Boolean, input to boyntonBootstrap, determines
+%   whether the bootstrapped confidence interval is "bias corrected." Deaults
+%   to true. 
+% - CIRange: a single number that specifies therange of the confidence
+% interval. Defaults to 95. 
+% - nReps: number of bootstrap repetitions. Defults to 1000. 
+% - compVal: value against which the mean of diffs is compared. Defaults
+%   to 0. 
+% 
+% Outputs: 
+% - tStat: a structure with outputs from Matlab's ttest function, with three variables attached: 
+%     tstat, the t-value; pval, the p-value, and df, the degrees of freedom. 
+% - bayesFactor: 1 number, the BF for a t-test, computed with the BayesFactor toolbox
+%   (https://klabhub.github.io/bayesFactor/) 
+% - CI: the bootstrapped confidence interval, computed with
+%   boyntonBootstrap
+% - sigStars: a character string of asterisks, if the difference is
+%   "significant." Used for adding stars to a plot to indicate significance.
+%   If the CI includes 0, then the effect is deemed not significant and
+%   sigStars is empty ''. Otherwise, if tStat.pval<0.001, sigStars = '***',
+%   if  tStat.pval<0.01, sigStars = '**', if tStat.pval<0.05, sigStars = '*'.
+
+
 function [tStat, bayesFactor, CI, sigStars] = diffStats(diffs, statsF, BCFlag, CIRange, nReps, compVal)
 
 
