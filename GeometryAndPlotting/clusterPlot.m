@@ -131,6 +131,10 @@ end
 if ~isfield(opt, 'indivPtConnectColor')
     opt.indivPtConnectColor = 0.8*ones(1,3);
 end
+if ~isfield(opt, 'indivLineWidth')
+    opt.indivLineWidth = 0.5;
+end
+
 
 if ~isfield(opt,'doYLab')
     opt.doYLab = true;
@@ -354,7 +358,7 @@ if opt.connectLev2IndivPts
         xs = cell2mat(allX(i1,:));
         ys = cell2mat(ds(i1,:));
         for pti=1:size(ys,1)
-            plot(xs(pti,:), ys(pti,:), '-','Color',opt.indivPtConnectColor);
+            plot(xs(pti,:), ys(pti,:), '-','Color',opt.indivPtConnectColor,'LineWidth',opt.indivLineWidth);
         end
     end
 end
@@ -381,7 +385,7 @@ if opt.connectLev1IndivPts
         
         ys = [y1 y2];
         for pti=1:size(ys,1)
-            plot(xs(pti,:), ys(pti,:), '-','Color',opt.indivPtConnectColor);
+            plot(xs(pti,:), ys(pti,:), '-','Color',opt.indivPtConnectColor,'LineWidth',opt.indivLineWidth);
         end
         
         

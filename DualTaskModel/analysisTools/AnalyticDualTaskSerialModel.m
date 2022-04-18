@@ -117,7 +117,6 @@ pTask1First(pTask1First<0) = 0;
 
 distFromAllOrNone = distanceFromPointToLine(dual2,dual1,slope,single1);
 
-
 %if performance is WORSE than all-or-none model, make this negative
 %difference in y-intercepts of best-fitting line and all-or-none line
 dY = intercept - single1;

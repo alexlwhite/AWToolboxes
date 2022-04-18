@@ -95,3 +95,4 @@ bcaHi = normcdf(zChi,0,1);
 
 CI(1) = prctile(bootstrapStat,100*bcaLo);
 CI(2) = prctile(bootstrapStat,100*bcaHi);
+
