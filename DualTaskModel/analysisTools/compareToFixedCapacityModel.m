@@ -59,7 +59,8 @@ fixedA2s =  DPrimeToAg(fixedD2s);
 %% Find nearest fixed-capacity parallel point to data: 
 fixedDists = sqrt((dualx-fixedA1s).^2 + (dualy-fixedA2s).^2);
 minDistToFixed = min(fixedDists); 
-pointI = fixedDists==minDistToFixed;
+pointI = find(fixedDists==minDistToFixed);
+pointI = pointI(1);
 nearestFixedPSampTask1 = pSamplesOnTask1(pointI);
 
 %% set distance to be negative if dual-task performance is WORSE than predicted by fixed-capacity model 
