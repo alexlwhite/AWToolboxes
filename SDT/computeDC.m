@@ -2,7 +2,7 @@ function [d, c, c2, beta, hitR, FAR, corrected] = computeDC(pres, resp)
 %Compute d' (d) and criterion (c) 
 % by Alex White, 2011
 % 
-% Usage: [d, c, c2, corrected] = computeDC(pres, resp)
+% Usage: [d, c, c2, beta, hitR, FAR, corrected] = computeDC(pres, resp)
 % Input: 
 % - pres should be vector of 1s (for signal present) and 0s (for signal
 % absent) 
