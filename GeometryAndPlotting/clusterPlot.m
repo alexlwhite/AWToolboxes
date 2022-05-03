@@ -65,7 +65,10 @@ end
 
 
 if ~isfield(opt,'markSz')
-    opt.markSz = 100;
+    opt.markSz = 10;
+end
+if ~isfield(opt,'markEdgeLineWidth')
+    opt.markEdgeLineWidth = 1;
 end
 if ~isfield(opt, 'symbols')
     opt.symbols = repmat({'o'}, n1, n2);
@@ -401,11 +404,14 @@ for i1 = 1:n1
         
         
         %dots
-        hdot  = scatter(allX{i1,i2}, ds{i1,i2});
-        hdot.Marker = opt.symbols{i1,i2};
-        hdot.SizeData = opt.markSz;
-        hdot.MarkerFaceColor = squeeze(opt.fillColors(i1,i2,:))';
-        hdot.MarkerEdgeColor = squeeze(opt.edgeColors(i1,i2,:))';
+        hdot = plot(allX{i1, i2}, ds{i1, i2}, opt.symbols{i1,i2}, 'MarkerEdgeColor',  squeeze(opt.edgeColors(i1,i2,:))', 'MarkerFaceColor', squeeze(opt.fillColors(i1,i2,:))', 'MarkerSize', opt.markSz, 'LineWidth', opt.markEdgeLineWidth);
+        
+%         hdot  = scatter(allX{i1,i2}, ds{i1,i2});
+%         hdot.Marker = opt.symbols{i1,i2};
+%         hdot.SizeData = opt.markSz;
+%         hdot.MarkerFaceColor = squeeze(opt.fillColors(i1,i2,:))';
+%         hdot.MarkerEdgeColor = squeeze(opt.edgeColors(i1,i2,:))';
+%         hdot.LineWidth = opt.markEdgeLineWidth;
         
         if isfield(opt, 'dotFaceAlpha')
             hdot.MarkerFaceAlpha = opt.dotFaceAlpha;
