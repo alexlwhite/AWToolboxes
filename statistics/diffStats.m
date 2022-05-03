@@ -61,8 +61,9 @@ if statsF>0
     % report the sample mean and SD
     sampleMean = mean(diffs);
     sampleSD = std(diffs);
+    sampleSEM = standardError(diffs);
     
-    fprintf(statsF, 'Mean of %i samples = %.3f, SD = %.3f\n', length(diffs), sampleMean, sampleSD);
+    fprintf(statsF, 'Mean of %i samples difference from %.1f = %.3f, SD = %.3f, SEM = %.3f\n', length(diffs), compVal, sampleMean, sampleSD, sampleSEM);
     
     %report confidence interval
     fprintf(statsF, '%i%% bootstrapped CI = [%.3f %.3f]\n', CIRange, CI(1), CI(2));
