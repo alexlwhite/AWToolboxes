@@ -1,4 +1,4 @@
-function saccTable = detectSaccades(postns,vel,velThresh,MINDUR,mergeInterval)
+function saccTable = detectSaccades(postns,vel,velThresh,minDur,mergeInterval)
 %-------------------------------------------------------------------
 %
 %  Adapted by Alex White from the function "microsacc.m", (Version 2.1, 03 OCT 05)
@@ -15,7 +15,7 @@ function saccTable = detectSaccades(postns,vel,velThresh,MINDUR,mergeInterval)
 %  postns:        a Nx2 vector of gaze positions, 1st column for horiz and  second for vert. Units could be deg or pix
 %  vel:           a Nx2 vector of velocities, 1st column for horiz and second for vert
 %  velThresh      a 1x2 vector of horizontal and vertical velocity thresholds
-%  MINDUR           minimal saccade duration, in *samples*
+%  minDur           minimal saccade duration, in *samples*
 %  mergeInterval: for subsequent saccade candidates, in *samples*
 %
 %  OUTPUTs:
@@ -32,7 +32,7 @@ function saccTable = detectSaccades(postns,vel,velThresh,MINDUR,mergeInterval)
 %    - totalAmpX, maximum horizontal difference in gaze positions during the whole high-velocity event
 %    - totalAmpY, maximum vertical difference during the whole event
 %    - amp: amplitude of saccade, distance from starting to ending point 
-%    - curveRatio: max deviation from straight line, devided by amp
+%    - curveRatio: max deviation from straight line, divided by amp
 
 %---------------------------------------------------------------------
 
@@ -60,7 +60,7 @@ while k<N
     if indx(k+1)-indx(k)==1 %if there is no gap in time
         dur = dur + 1; %then the current "event's" duration increases
     else %we've jumped time, so the previous period of high velocity ended
-        if dur>=MINDUR %if this high-velocity event was long enough
+        if dur>=minDur %if this high-velocity event was long enough
             nsac = nsac + 1;
             b = k; %saccade offset time
             sac(nsac,:) = [indx(a) indx(b)]; %[starttime, endtime] (samples)
@@ -72,7 +72,7 @@ while k<N
 end
 
 % check for one last saccade at the very end, for minimum duration
-if dur>=MINDUR
+if dur>=minDur
     nsac = nsac + 1;
     b = k;
     sac(nsac,:) = [indx(a) indx(b)];
