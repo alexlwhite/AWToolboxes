@@ -39,14 +39,17 @@
 %   nearest point on the all-or-none switching model. Negative if data point
 %   is below the line. 
 %
-function [pProcessBoth, pTask1First, slope, intercept, distFromAllOrNone] = AnalyticDualTaskSerialModel(singleAccs, dualAccs, doPlot)
+function [pProcessBoth, pTask1First, slope, intercept, distFromAllOrNone] = AnalyticDualTaskSerialModel(singleAccs, dualAccs, doPlot, chanceLevel)
 
+if nargin<4
+    chanceLevel = 0.5; 
+end
 %We assume that chance level is 0.5, and the axes of the AOC plot are
 %limited to [0.5 1]. So to calculate things like slopes and intercepts and
 %distances in the AOC space, we need to subtract 0.5 from everything and
 %pretend like the axis limits really are [0 0.5]. 
-singleAccs = singleAccs - 0.5; 
-dualAccs = dualAccs - 0.5; 
+singleAccs = singleAccs - chanceLevel; 
+dualAccs = dualAccs - chanceLevel; 
 
 
 %pull out data:
@@ -133,19 +136,19 @@ if doPlot
     figure; hold on;
     
     %add 0.5 back to everything 
-    single1 = single1 + 0.5;
-    single2 = single2 + 0.5;
-    dual1 = dual1 + 0.5;
-    dual2 = dual2 + 0.5;
+    single1 = single1 + chanceLevel;
+    single2 = single2 + chanceLevel;
+    dual1 = dual1 + chanceLevel;
+    dual2 = dual2 + chanceLevel;
     
     %plot box constrained by indepenent processing:
-    plot([single2 single2],[0.5 single1],'k-');
-    plot([0.5 single2],[single1 single1],'k-');
+    plot([single2 single2],[chanceLevel single1],'k-');
+    plot([chanceLevel single2],[single1 single1],'k-');
     
     %plot all-or-none serial model. Solve for that equation using x,y
     %coordinates of left single task accuracy:
-    x0 = 0.5; y0=single1;
-    betaAllOrNone = y0 - slope*0.5;
+    x0 = chanceLevel; y0=single1;
+    betaAllOrNone = y0 - slope*chanceLevel;
     xs = [.5 single2];
     ys = slope*xs+betaAllOrNone;
     plot(xs,ys,'k-');
@@ -156,7 +159,7 @@ if doPlot
 
     xs = [dual2Ignored single2];
     ys = slope*xs+intercept;
-    plot(xs+0.5,ys+0.5,'r-');
+    plot(xs+chanceLevel,ys+chanceLevel,'r-');
     
     
     %Plot prediction of fixed-capacity parallel processing
@@ -186,8 +189,8 @@ if doPlot
     
     
     %plot data:
-    plot(0.5,single1,'b.-','MarkerSize',dataMarkSz);
-    plot(single2,0.5,'b.-','MarkerSize',dataMarkSz);
+    plot(chanceLevel,single1,'b.-','MarkerSize',dataMarkSz);
+    plot(single2,chanceLevel,'b.-','MarkerSize',dataMarkSz);
     plot(dual2,dual1,'k.','MarkerSize',dataMarkSz)
     
     
@@ -198,8 +201,8 @@ if doPlot
     axis square;
     xlabel('Right side p(c)');
     ylabel('Left side p(c)');
-    xlim([0.5 1]); ylim([0.5 1]);
-    ticks = 0.5:0.1:1;
+    xlim([chanceLevel 1]); ylim([chanceLevel 1]);
+    ticks = chanceLevel:0.1:1;
     set(gca,'XTick',ticks,'YTick',ticks);
     
 end
