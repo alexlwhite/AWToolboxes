@@ -1,4 +1,4 @@
-%% function [medX, medY, goodTimes, blinkCutTimes, noBlinkIntervals, pDataRemainAfterBlinkCut] = computeGazePosAndBlinks(time1, time2, edf)
+%% function [medPos, meanPos, goodTimes, blinkCutTimes, noBlinkIntervals, pDataRemainAfterBlinkCut] = computeGazePosAndBlinks(time1, time2, edf)
 % This function finds blinks in a sequence of gaze positions and computes
 % the median gaze position (excluding periods with blinks). Blinks are
 % detected because pupil size is 0.
