@@ -1,4 +1,4 @@
-%% function [tStat, bayesFactor, CI, sigStars] = diffStats(diffs, statsF, BCFlag, CIRange, nReps, compVal)
+%% function [tStat, bayesFactor, CI, sigStars] = diffStats(diffs, statsF, BCFlag, CIRange, nReps, compVal, weights)
 % run statistics on a vector of differences (or really any numbers). Common
 % usage is to determine statistics on the mean difference between two
 % experimental conditions. This function computes and prints the result of
@@ -17,6 +17,8 @@
 % - nReps: number of bootstrap repetitions. Defults to 1000. 
 % - compVal: value against which the mean of diffs is compared. Defaults
 %   to 0. 
+% - weights: a vector of weights for use computing weighted SD, SEM and mean in the
+%   bootstrapping. Must be same length as "diffs", all non-negative. 
 % 
 % Outputs: 
 % - tStat: a structure with outputs from Matlab's ttest function, with three variables attached: 
@@ -32,7 +34,7 @@
 %   if  tStat.pval<0.01, sigStars = '**', if tStat.pval<0.05, sigStars = '*'.
 
 
-function [tStat, bayesFactor, CI, sigStars] = diffStats(diffs, statsF, BCFlag, CIRange, nReps, compVal)
+function [tStat, bayesFactor, CI, sigStars] = diffStats(diffs, statsF, BCFlag, CIRange, nReps, compVal, weights)
 
 
 if nargin<3
@@ -47,6 +49,15 @@ end
 if nargin<6
     compVal = 0;
 end
+
+if nargin<7
+    meanFun = @mean;
+    doWeighted = false;
+    weights = ones(size(diffs));
+else
+    meanFun = @weightedMean;
+    doWeighted = true;
+end
 %compare to some value:     
 diffs = diffs-compVal;
 
@@ -54,14 +65,18 @@ diffs = diffs-compVal;
 [~, tp, ~, tStat] = ttest(diffs);
 tStat.pval = tp;
 bayesFactor = bf.ttest(diffs);
-CI = boyntonBootstrap(@mean, diffs, nReps,CIRange,BCFlag); 
+if doWeighted
+    [CI, sampleMean] = boyntonBootstrap(meanFun, diffs, nReps,CIRange,BCFlag,weights); 
+else
+    [CI, sampleMean] = boyntonBootstrap(meanFun, diffs, nReps,CIRange,BCFlag);
+end
+
 
 %% print
 if statsF>0
     % report the sample mean and SD
-    sampleMean = mean(diffs);
-    sampleSD = std(diffs);
-    sampleSEM = standardError(diffs);
+    sampleSD = sqrt(var(diffs, weights));
+    sampleSEM = standardError(diffs, ndims(diffs), weights);
     
     fprintf(statsF, 'Mean of %i samples difference from %.1f = %.3f, SD = %.3f, SEM = %.3f\n', length(diffs), compVal, sampleMean, sampleSD, sampleSEM);
     

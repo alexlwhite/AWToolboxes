@@ -14,19 +14,26 @@
 % by Alex White, 2018, at the University of Washington. 
 % 
 
-function SEM = standardError(ds,dim) 
+function SEM = standardError(ds, dim, weights) 
 
 if nargin<2 || ~exist('dim','var')
     dim = ndims(ds);
-    
-    %if ds is a vector, make sure we take SEM over the one dimension that
-    %matters:
-    if isvector(ds)
-        dim = find(size(ds)>1);
-    end 
 end
-  
+%if ds is a vector, make sure we take SEM over the one dimension that
+%matters:
+if isvector(ds)
+    dim = find(size(ds)>1);
+end
+
+if nargin<3 || ~exist('weights','var')
+    weights = ones(1,size(ds, ndims(ds)));
+end
+weights = weights/sum(weights);  
 
 %N: count how many non-nan measurements there are 
 N = sum(~isnan(ds),dim);
-SEM = nanstd(ds,0,dim)./sqrt(N);
+try
+    SEM = sqrt(nanvar(ds,weights,dim))./sqrt(N);
+catch
+    keyboard
+end

@@ -18,7 +18,7 @@ function y = weightedMean(x,w,dim)
 %       x = rand(5,2);
 %       w = rand(5,2);
 %       weightedMean(x,w)
-
+%
 % wmean written by Adam Auton in  2009. 
 % Modified by Alex White, 2022
 
@@ -26,10 +26,30 @@ if nargin<2
     error('Not enough input arguments.');
 end
 
+
+if nargin==2 
+  % Determine which dimension SUM will use
+  dim = find(size(x)~=1, 1, 'last');
+  if isempty(dim), dim = 1; end
+end
+
+
 % Check that dimensions of X match those of W.
 if(~isequal(size(x), size(w)))
-    if isvector(w) && all(size(w') == size(x)) %if they are just vectors to be transposed
-        w = w';
+    if isvector(w) && isvector(x) 
+        if all(size(w') == size(x)) %if they are just vectors to be transposed
+            w = w';
+        else
+            error('Inputs x and w must be the same size.');
+        end 
+    elseif isvector(w) %replicate it to be the same size of x
+        reshapeDims = ones(1,ndims(x));
+        reshapeDims(dim) = length(w);
+        wr = reshape(w, reshapeDims);
+        repDims = size(x); 
+        repDims(dim) = 1;
+        w = repmat(wr, repDims);
+        %fprintf(1,'\n(%s) Reshaping weight vector w to be a matrix of same size as x\n',mfilename);
     else
         keyboard
         error('Inputs x and w must be the same size.');
@@ -44,12 +64,6 @@ end
 % Check that there is at least one non-zero weight.
 if (all(w(:)==0))
     error('At least one weight must be non-zero.');
-end
-
-if nargin==2 
-  % Determine which dimension SUM will use
-  dim = find(size(x)~=1, 1, 'last');
-  if isempty(dim), dim = 1; end
 end
 
 

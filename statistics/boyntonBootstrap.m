@@ -1,4 +1,4 @@
-%% [CI,sampleStat,bootstrapStat] = boyntonBootstrap(myStatistic,x,nReps,CIrange,BCFlag)
+%% [CI,sampleStat,bootstrapStat] = boyntonBootstrap(myStatistic,x,nReps,CIrange,BCFlag,weights)
 %
 % Calculates a confidence interval on the statistic (function handle
 % 'myStatistic' using a nonparametric bootstrap and the bias-corrected
@@ -29,7 +29,7 @@
 %        (Chapman & Hall/CRC, 1993, pages 178-201)
 % 04/12/18 Edited by ALW to return bootstrapStat
 %
-function [CI,sampleStat,bootstrapStat] = boyntonBootstrap(myStatistic,x,nReps,CIrange,BCFlag)
+function [CI,sampleStat,bootstrapStat] = boyntonBootstrap(myStatistic,x,nReps,CIrange,BCFlag,weights)
 
 
 %%
@@ -47,19 +47,36 @@ if ~exist('nReps','var')
     nReps=2000;
 end
 
+doWeighted = exist('weights','var');
+    
 %%
 % Run the statistic on the sample 'x'
+if ~doWeighted
+    sampleStat = myStatistic(x);
+else
+    try
+        sampleStat = myStatistic(x, weights);
+    catch
+        keyboard
+    end
+        
+end
 
-sampleStat = myStatistic(x);
 
 %% 
 % Run the statistic on resampled versions of x
 id = ceil(rand(length(x),nReps)*length(x)); %matrix of random indices into x
 resampledX = x(id);      %resampled versions of 'x
-
+if doWeighted
+    resampledW = weights(id);
+end
 bootstrapStat = zeros(1,nReps);
 for i=1:nReps
-    bootstrapStat(i) = myStatistic(resampledX(:,i));
+    if ~doWeighted
+        bootstrapStat(i) = myStatistic(resampledX(:,i));
+    else
+        bootstrapStat(i) = myStatistic(resampledX(:,i),resampledW(:,i));
+    end
 end
 
 
@@ -72,7 +89,11 @@ if BCFlag
     %calculate the statistic holding one member of x out each time
     for i=1:length(x)
         id = [1:(i-1),(i+1):length(x)];
-        thetai(i) = myStatistic(x(id));
+        if ~doWeighted
+            thetai(i) = myStatistic(x(id));
+        else
+            thetai(i) = myStatistic(x(id),weights(id));
+        end
     end
     %do something related to skewness.
     a = sum( (mean(thetai)-thetai).^3)/(6*(sum( (mean(thetai)-thetai).^2).^(3/2)));
