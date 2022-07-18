@@ -32,6 +32,7 @@
 %      - plotSerialPrediction: boolean, whether to plot the best-fitting serial-model's
 %        prediction for dual-task accurayc as a red point 
 %      - sideLabels: a 1x2 cell array for the labels of the two axes
+%      - chanceLevel: what chance level is
 %
 %
 % Outputs: 
@@ -75,6 +76,9 @@ if ~isfield(plotOpt,'ebLineWidth')
     plotOpt.ebLineWidth = 1;
 end
 
+if ~isfield(plotOpt,'chanceLevel')
+    plotOpt.chanceLevel = 0.5;
+end
 
 if ~isfield(plotOpt,'units')
     plotOpt.units = 'Ag';
@@ -93,13 +97,13 @@ end
 
 %% setup axes
 if ~isfield(plotOpt,'axlims')
-    axlims = [0.5 1];
+    axlims = [plotOpt.chanceLevel 1];
 else
     axlims = plotOpt.axlims;
 end
 
 if ~isfield(plotOpt,'axticks')
-    axticks = 0.5:(0.125):1;
+    axticks =  plotOpt.chanceLevel:(0.125):1;
 else
     axticks = plotOpt.axticks;
 end
@@ -139,30 +143,32 @@ dualFillColor = plotOpt.fillColors(2,:);
 
 
 %% Predictions of fixed-capacity parallel model:
-singleAs = as(1,:); %data as area under ROC for single task conditions left and right
-%order needs flip:
-singleAs = fliplr(singleAs);
-singleDs = AgToDprime(singleAs); %convert to d'
-
-pSamplesOnTask1 = 0:0.001:1;  %vector of proportion of fixed number of sensory "samples" devited to task 1
-
-% How to calculate d' for diffent numbers of "samples"
-% given sample sizes ss1 and ss2: ss1 = ss2/2
-% std1 = sqrt(2)*std2
-% generalized:
-%if ss1 = ss2*q, then
-%std1 = sqrt(1/q)*std2
-
-%therefore, d' relation is:
-% d1 = d2/sqrt(1/q)
-
-%dual-task dprimes
-fixedD1s = singleDs(1)./sqrt(1./pSamplesOnTask1);
-fixedD2s = singleDs(2)./sqrt(1./(1-pSamplesOnTask1));
-
-%dual-task AROCs,
-fixedA1s = DPrimeToAg(fixedD1s);
-fixedA2s =  DPrimeToAg(fixedD2s);
+if plotOpt.chanceLevel == 0.5
+    singleAs = as(1,:); %data as area under ROC for single task conditions left and right
+    %order needs flip:
+    singleAs = fliplr(singleAs);
+    singleDs = AgToDprime(singleAs); %convert to d'
+    
+    pSamplesOnTask1 = 0:0.001:1;  %vector of proportion of fixed number of sensory "samples" devited to task 1
+    
+    % How to calculate d' for diffent numbers of "samples"
+    % given sample sizes ss1 and ss2: ss1 = ss2/2
+    % std1 = sqrt(2)*std2
+    % generalized:
+    %if ss1 = ss2*q, then
+    %std1 = sqrt(1/q)*std2
+    
+    %therefore, d' relation is:
+    % d1 = d2/sqrt(1/q)
+    
+    %dual-task dprimes
+    fixedD1s = singleDs(1)./sqrt(1./pSamplesOnTask1);
+    fixedD2s = singleDs(2)./sqrt(1./(1-pSamplesOnTask1));
+    
+    %dual-task AROCs,
+    fixedA1s = DPrimeToAg(fixedD1s);
+    fixedA2s =  DPrimeToAg(fixedD2s);
+end
 %% Plot the box for unlimited capacity model
 hold on;
 
@@ -173,8 +179,9 @@ plot([axlims(1) as(1,2)], [as(1,1) as(1,1)],'k--','LineWidth',datLineWidth, 'Col
 plot([axlims(1) as(1,2)], [as(1,1) axlims(1)],'k-','LineWidth',datLineWidth, 'Color',plotOpt.predLineColor);
 
 %% Plot fixed-capacity parallel prediction curve:
-plot(fixedA1s,fixedA2s,'-','Color','k','LineWidth',datLineWidth, 'Color',plotOpt.predLineColor); %dualEdgeColor*0.8);
-
+if plotOpt.chanceLevel == 0.5
+    plot(fixedA1s,fixedA2s,'-','Color','k','LineWidth',datLineWidth, 'Color',plotOpt.predLineColor); %dualEdgeColor*0.8);
+end
 %% Solve for best-fitting serial model
 [pProcessBoth, pTask1First, slope, intercept] = AnalyticDualTaskSerialModel(as(1,:),as(2,:), false);
 %then predict dual-task performance given our 2 parameters:
