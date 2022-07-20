@@ -1,10 +1,13 @@
-%% function se = standardError(ds, dim) 
+%% function SEM = standardError(ds, dim, weights) 
 % Compute standard error of the mean: SD/sqrt(N)
 % 
 % Inputs: 
 % - ds: a matrix of data. This can be any size. 
 % - dim: the dimension over which to take the SEM over. The default is the last 
 %   dimension. For instance, the last dimension could be subjects in a within-subjects experiment. 
+%    If omitted, the default dimension is the last in ds. 
+% - weights: optional vector of nonzero positive weights to apply in
+% computation of variance 
 % 
 % Outputs: 
 % - SEM: the standard error of the mean: the standard deviation divided by
@@ -27,13 +30,16 @@ end
 
 if nargin<3 || ~exist('weights','var')
     weights = ones(1,size(ds, ndims(ds)));
+elseif ~isvector(weights)
+    error('weights must be a vector');
 end
+    
 weights = weights/sum(weights);  
 
 %N: count how many non-nan measurements there are 
 N = sum(~isnan(ds),dim);
 try
-    SEM = sqrt(nanvar(ds,weights,dim))./sqrt(N);
+    SEM = sqrt(var(ds,weights,dim,'omitnan'))./sqrt(N);
 catch
     keyboard
 end
