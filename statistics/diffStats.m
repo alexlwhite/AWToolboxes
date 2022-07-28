@@ -1,4 +1,4 @@
-%% function [tStat, bayesFactor, CI, sigStars] = diffStats(diffs, statsF, BCFlag, CIRange, nReps, compVal, weights)
+%% function [tStat, bayesFactor, CI, sigStars, sampleMean, sampleSEM] = diffStats(diffs, statsF, BCFlag, CIRange, nReps, compVal, weights)
 % run statistics on a vector of differences (or really any numbers). Common
 % usage is to determine statistics on the mean difference between two
 % experimental conditions. This function computes and prints the result of
@@ -34,7 +34,7 @@
 %   if  tStat.pval<0.01, sigStars = '**', if tStat.pval<0.05, sigStars = '*'.
 
 
-function [tStat, bayesFactor, CI, sigStars] = diffStats(diffs, statsF, BCFlag, CIRange, nReps, compVal, weights)
+function [tStat, bayesFactor, CI, sigStars, sampleMean, sampleSEM] = diffStats(diffs, statsF, BCFlag, CIRange, nReps, compVal, weights)
 
 
 if nargin<3
@@ -70,13 +70,13 @@ if doWeighted
 else
     [CI, sampleMean] = boyntonBootstrap(meanFun, diffs, nReps,CIRange,BCFlag);
 end
+sampleSEM = standardError(diffs, ndims(diffs), weights);
 
 
 %% print
 if statsF>0
     % report the sample mean and SD
     sampleSD = sqrt(var(diffs, weights));
-    sampleSEM = standardError(diffs, ndims(diffs), weights);
     
     fprintf(statsF, 'Mean of %i samples difference from %.1f = %.3f, SD = %.3f, SEM = %.3f\n', length(diffs), compVal, sampleMean, sampleSD, sampleSEM);
     
