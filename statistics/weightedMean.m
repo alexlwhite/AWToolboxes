@@ -56,6 +56,13 @@ if(~isequal(size(x), size(w)))
     end
 end
 
+%Deal with NaNs in data x that may not match 0s in w
+if all(size(x)==size(w))
+    w(isnan(x)) = 0; %set weights to 0 where x has missing values
+else
+    error('failure to set inputs x and w to be same size');
+end
+
 % Check that all of W are non-negative.
 if (any(w(:)<0))
     error('All weights, W, must be non-negative.');
