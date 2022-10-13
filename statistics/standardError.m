@@ -20,7 +20,9 @@
 function SEM = standardError(ds, dim, weights) 
 
 if nargin<2 || ~exist('dim','var')
-    dim = ndims(ds);
+    % Determine which dimension to use--the last one
+    dim = find(size(ds)~=1, 1, 'last');
+    if isempty(dim), dim = 1; end
 end
 %if ds is a vector, make sure we take SEM over the one dimension that
 %matters:
@@ -29,11 +31,43 @@ if isvector(ds)
 end
 
 if nargin<3 || ~exist('weights','var')
-    weights = ones(1,size(ds, ndims(ds)));
+    weights = ones(1,size(ds, dim));
 elseif ~isvector(weights)
     error('weights must be a vector');
 end
+
+if length(weights)~=size(ds, dim)
+    error('The length of weights must equal the size of input ds over dimension dim');
+else
+    if isvector(weights) && isvector(ds) 
+        if all(size(weights') == size(ds)) %if they are just vectors to be transposed
+            weights = weights';
+        end
+    end
+end
     
+%set weights to 0 where the data are NaN
+if isvector(ds)
+    weights(isnan(ds)) = 0;
+else %reduce each weight proportion to how much of ds is NaN
+    %first replicate w so it is same size as ds
+    reshapeDims = ones(1,ndims(ds));
+    reshapeDims(dim) = length(weights);
+    wr = reshape(weights, reshapeDims);
+    repDims = size(ds);
+    repDims(dim) = 1;
+    w = repmat(wr, repDims);
+    
+    %now set weights to 0 where corresponding element of ds is NaN
+    w(isnan(ds)) = 0;
+    %now sum over other dimensions to get weights back to a vector
+    dimsToSum = setdiff(1:ndims(ds), dim);
+    for di=dimsToSum
+        w = sum(w, di);
+    end
+    weights = squeeze(w);
+end
+
 weights = weights/sum(weights);  
 
 %N: count how many non-nan measurements there are 

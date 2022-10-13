@@ -94,15 +94,15 @@ if statsF>0
 end
 
 %% how "significant" is the result, for the purpose of putting asterisks 
+%to get any star, must have p<0.05 and CI excludes 0
+sigStars = '';
 isSig = all(CI<0) || all(CI>0);
 if isSig
     if tStat.pval<0.001
         sigStars = '***';
     elseif tStat.pval<0.01
         sigStars = '**';
-    else
+    elseif tStat.pval<0.05 
         sigStars = '*';
     end
-else
-    sigStars = '';
 end
