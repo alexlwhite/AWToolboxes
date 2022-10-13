@@ -27,7 +27,11 @@ end
 %if ds is a vector, make sure we take SEM over the one dimension that
 %matters:
 if isvector(ds)
-    dim = find(size(ds)>1);
+    if length(ds)>1
+        dim = find(size(ds)>1);
+    else
+        dim = 1;
+    end
 end
 
 if nargin<3 || ~exist('weights','var')
