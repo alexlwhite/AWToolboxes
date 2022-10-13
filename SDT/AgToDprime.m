@@ -1,6 +1,5 @@
 %% function dprime = AgToDprime(Ag) 
 % Converts between area under the ROC curve (Ag) to dprime. 
-% Treats Ag like unbiased p(correct) in a 2AFC task. 
 function dprime = AgToDprime(Ag) 
 
 dprime = sqrt(2)*norminv(Ag);
@@ -57,14 +56,30 @@ dprime = sqrt(2)*norminv(Ag);
 % legend({'true Ag', 'predicted Ag','true PC','predicted PC'},'Location', 'NorthWest');
 % xlabel('d-prime'); 
 % ylabel('Ag');
-
-%So, yes, we can summarize the relationship between Ag (area under ROC
-%curve) and dprime as follows: 
-%% dprime = sqrt(2)*norminv(Ag)
-%% Ag = normcdf(dprime/sqrt(2))
-
-%% But note that the relationship between dprime and a one-interval,
-%2-alternative forced-choice proportion correct is different! (assuming
-%unbiased criterion)
-%dprime = 2*norminv(PC);
-%PC = normcdf(dprime/2);
+% 
+% %% % So, yes, we can summarize the relationship between Ag (area under ROC curve) and dprime as follows: 
+% %% dprime = sqrt(2)*norminv(Ag)
+% %% Ag = normcdf(dprime/sqrt(2))
+% 
+% %% But note that the relationship between dprime and a one-interval, 2-AFC proportion correct is different!
+% % (assuming unbiased criterion)
+% %
+% % dprime = 2*norminv(PC);
+% % PC = normcdf(dprime/2);
+% % 
+% %% So, the relationship between PC and Ag is...  
+% %% 2*norminv(PC) = sqrt(2)*norminv(Ag);
+% %% PC = normcdf(sqrt(2)*norminv(Ag)/2);
+% % 
+% % proportion correct is lower than Ag
+% predPC2 = normcdf(sqrt(2)*norminv(Ags)/2);
+% figure; hold on
+% plot([0.5 1],[0.5 1],'k-')
+% h1=plot(Ags, PCs, 'b-','LineWidth', 4);
+% h2=plot(Ags, predPC2, 'r-','LineWidth', 2); 
+% xlim([0.5 1]); ylim([0.5 1]);
+% 
+% legend([h1 h2],{'true PC','predicted PC'},'Location', 'NorthWest');
+% xlabel('Ag'); 
+% ylabel('PC');
+% 

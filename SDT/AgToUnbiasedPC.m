@@ -83,4 +83,6 @@ PC = normcdf(sqrt(2)*norminv(Ag)/2);
 % xlabel('Ag'); 
 % ylabel('PC');
 % 
-% %for constructing AOCs, what if we went from measured Ag to predicted unbiased PC? 
+% %for constructing AOCs, what if we went from measured Ag to predicted
+% unbiased PC? I tested it, and everything is shrunk down, but same
+% relative effects. 
