@@ -30,10 +30,11 @@
 %
 % Output: 
 % - kernelWidth: the kernel width used. 
+% - maxXs: the maximum probabilities as deviations from the midline
 % 
 % By Alex L. White, University of Washington, 2019
 
-function kernelWidth = pairedSampleDensityPlot(data, opt)
+function [kernelWidth, maxXs] = pairedSampleDensityPlot(data, opt)
 
 if opt.fixKernelWidth
     kernelWidth = opt.fixedKernelWidth;
@@ -57,11 +58,16 @@ for jj = 1:2
 
     %set xvals as deviations, positive or negative, from midline 
     xvals = opt.midlineX + plotSigns(jj)*dens;
-    
-    legendHs(jj) = fill(xvals,yvals,opt.fillColors(jj,:),'EdgeColor',opt.edgeColors(jj,:),'LineWidth',opt.fillLineWidth);
-    %fill again in opposite direction to avoid weird lines
-    fill(fliplr(xvals),fliplr(yvals),opt.fillColors(jj,:),'EdgeColor',opt.edgeColors(jj,:),'LineWidth',opt.fillLineWidth);
-    
+
+    %option for just an outline with no fill: NaNs in fillColors
+    if all(isnan(opt.fillColors(jj, :)))
+        legendHs(jj) = plot(xvals, yvals, '-', 'Color', opt.edgeColors(jj,:),'LineWidth',opt.fillLineWidth);
+    else %filled distribution
+
+        legendHs(jj) = fill(xvals,yvals,opt.fillColors(jj,:),'EdgeColor',opt.edgeColors(jj,:),'LineWidth',opt.fillLineWidth);
+        %fill again in opposite direction to avoid weird lines
+        fill(fliplr(xvals),fliplr(yvals),opt.fillColors(jj,:),'EdgeColor',opt.edgeColors(jj,:),'LineWidth',opt.fillLineWidth);
+    end
     %add mean
     meanY = nanmean(data{jj});
     
@@ -122,6 +128,7 @@ if opt.doXLabel
 end
 
 if opt.doLegend
-    legend(legendHs,opt.legendLabs,'Location',opt.legendLoc);
+    l=legend(legendHs,opt.legendLabs,'Location',opt.legendLoc);
+    set(l,'AutoUpdate','off')
 end
 
