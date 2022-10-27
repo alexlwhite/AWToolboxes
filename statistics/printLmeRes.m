@@ -8,7 +8,7 @@ for ci=1:length(cs.Name)
 end
 
 anv = lme.anova;
-fprintf(sf,'\n\nANOVA\n');
+fprintf(sf,'\n\nANOVA');
 fprintf(sf,'\nFactor\tF\tDF1\tDF2\tp');
 for ci=1:length(anv.Term)
     fprintf(sf,'\n%s\t%.4f\t%.4f\t%.4f\t%.7f\t', anv.Term{ci}, anv.FStat(ci), anv.DF1(ci), anv.DF2(ci), anv.pValue(ci));
