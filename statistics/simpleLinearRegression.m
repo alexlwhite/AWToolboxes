@@ -36,7 +36,7 @@ slope = B(2);
 %y-values predicted by the model 
 Y_hat = D*B;
 
-resids =Y_hat - Y;
+resids = Y_hat - Y;
 SSResid = sum(resids.^2);
 SSTot = sum((Y - mean(Y)).^2);
 rSqr = 1-SSResid/SSTot;
