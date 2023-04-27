@@ -48,15 +48,17 @@ for fi = fileOrder
             nFiles = numel(fileNames);
         end
     else
-        ftype = thisf((end-typeLen+1):end);
-        if strcmp(ftype,fileType)
-            nFiles = nFiles+1;
-            fileNames{nFiles} = thisf;
-            if isempty(dirs) %initalize dirs
-                dirs{1} = sdir;
-                nDir = 1;
+        if length(thisf)>(typeLen+1)
+            ftype = thisf((end-typeLen+1):end);
+            if strcmp(ftype,fileType)
+                nFiles = nFiles+1;
+                fileNames{nFiles} = thisf;
+                if isempty(dirs) %initalize dirs
+                    dirs{1} = sdir;
+                    nDir = 1;
+                end
+                dirIs = [dirIs 1];
             end
-            dirIs = [dirIs 1];  
         end
     end
 end
