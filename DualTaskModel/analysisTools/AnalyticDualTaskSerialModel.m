@@ -44,9 +44,9 @@ function [pProcessBoth, pTask1First, slope, intercept, distFromAllOrNone] = Anal
 if nargin<4
     chanceLevel = 0.5; 
 end
-%We assume that chance level is 0.5, and the axes of the AOC plot are
-%limited to [0.5 1]. So to calculate things like slopes and intercepts and
-%distances in the AOC space, we need to subtract 0.5 from everything and
+
+%To calculate things like slopes and intercepts and
+%distances in the AOC space, we need to subtract chance level (usually 0.5) from the accuracy levels and
 %pretend like the axis limits really are [0 0.5]. 
 singleAccs = singleAccs - chanceLevel; 
 dualAccs = dualAccs - chanceLevel; 
@@ -126,7 +126,6 @@ dY = intercept - single1;
 if dY<0
     distFromAllOrNone = distFromAllOrNone*-1;
 end
-
 
 %% plot
 if doPlot
