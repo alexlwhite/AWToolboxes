@@ -23,8 +23,9 @@
 % Inputs: 
 % - singleAccs: a 1x2 vector of accuracy in single-task conditions for the
 %   two tasks. Units: p(correct) or area under ROC curve. 
-% - dualACcs: a 1x2 vector of accuracy in dual-task conditions for the same
-%   two tasks.
+%   The 1st element goes on the y axis, and the second goes on the X axis.  
+% - dualAccs: a 1x2 vector of accuracy in dual-task conditions for the same
+%   two tasks. The 1st element goes on the y axis, and the second goes on the X axis.  
 % - doPlot: whether to make an ROC plot showing data and model predictions.
 % 
 % Outputs: 
@@ -38,8 +39,16 @@
 % - distFromAllOrNone: distance between dual-task data point and the
 %   nearest point on the all-or-none switching model. Negative if data point
 %   is below the line. 
+% - normedDistFromAllOrNone: a normalized measure of distance from serial
+%   model, along the line that connects the dual-task accuracy point to the
+%   unlimited capacity parallel model. This distance is normalized by (i.e., divided by) 
+%   by the total length of the segement of that line betwen the unlimited
+%   capacity point and the serial model prediction's line. This measure is
+%   negative if accuracy is worse than the serial model predicts. This
+%   measure can only be computed if both singleAccs<dualAccs. If not, it is
+%   NaN. 
 %
-function [pProcessBoth, pTask1First, slope, intercept, distFromAllOrNone] = AnalyticDualTaskSerialModel(singleAccs, dualAccs, doPlot, chanceLevel)
+function [pProcessBoth, pTask1First, slope, intercept, distFromAllOrNone, normedDistFromAllOrNone] = AnalyticDualTaskSerialModel(singleAccs, dualAccs, doPlot, chanceLevel)
 
 if nargin<4
     chanceLevel = 0.5; 
@@ -53,36 +62,36 @@ dualAccs = dualAccs - chanceLevel;
 
 
 %pull out data:
-dual1  = dualAccs(1); %y-value
-dual2 = dualAccs(2); %x-value
-single1  = singleAccs(1);%y-value
-single2 = singleAccs(2);%x-value
+dualY  = dualAccs(1); %y-value
+dualX = dualAccs(2); %x-value
+singleY  = singleAccs(1);%y-value
+singleX = singleAccs(2);%x-value
 
 
-%Given single-task accuracy on the two tasks, single1 and single2,
-%and dual-task accuries, dual1 and dual2,
+%Given single-task accuracy on the two tasks, singleY and singleX,
+%and dual-task accuries, dualY and dualX,
 %we want to solve for the dual-task model parameters pProcessBoth and
 %pTask1First.
 
 %First we can solve for the slope of all the dual-task lines
-%slope = (.5-single1)/(single2-0.5); %this was true before we subtracted 0.5 from all data points 
-slope = -single1/single2;
+%slope = (.5-singleY)/(singleX-0.5); %this was true before we subtracted 0.5 from all data points 
+slope = -singleY/singleX;
 
 %Second, we can solve for the y-intercept of the best-fitting line, using our measured
 %left and right dual-task performance
-intercept = dual1 - slope*dual2;
+intercept = dualY - slope*dualX;
 
 %Then we can find the predicted value of left-dual task performance when attention is
 %devoted entirely to task 2, and task 1 is supposed to be ignored on 100%
 %of trials. Call this dual1Ignored (dual-task one when ignored). It is the y-value of the line when the x-value is
-%single2.
-dual1Ignored = slope*single2+intercept;
+%singleX.
+dual1Ignored = slope*singleX+intercept;
 
 % from this we can solve for the proportion of trials when only 1 side is
 % processed and the other must be guessed. 
 % We assume that accuracy when guessing is 0.5.
 guessingPCorr = 0; %0.5; %no longer 0.5 because we subtracted that out 
-pProcessOnlyOne = (dual1Ignored - single1)/(guessingPCorr - single1);
+pProcessOnlyOne = (dual1Ignored - singleY)/(guessingPCorr - singleY);
 %clip this propability to be between 0 and 1
 pProcessOnlyOne(pProcessOnlyOne<0)=0; 
 pProcessOnlyOne(pProcessOnlyOne>1)=1; 
@@ -91,12 +100,12 @@ pProcessBoth  = 1-pProcessOnlyOne;
 
 %[We could also do this using the predicted right-side accuracy when right side is
 %supposed to be ignored, dual2Ignored
-%dual2Ignored = (single1-intercept)/slope;
-%pProcessOnlyOne_B = (dual2Ignored - single2)/(guessingPCorr - single2); %]
+%dual2Ignored = (singleY-intercept)/slope;
+%pProcessOnlyOne_B = (dual2Ignored - singleX)/(guessingPCorr - singleX); %]
 
 % Then solve for pAttendTask1, or pAL (proportion of dual-task trials
 % attend to left first)
-pTask1First = (dual2 - single2)/(pProcessOnlyOne*guessingPCorr - single2*pProcessOnlyOne);
+pTask1First = (dualX - singleX)/(pProcessOnlyOne*guessingPCorr - singleX*pProcessOnlyOne);
 
 %clip in case dual-task performance exceeds any serial model 
 pTask1First(pTask1First>1) = 1;
@@ -105,26 +114,71 @@ pTask1First(pTask1First<0) = 0;
 
 %% find the minimum distance between the dual-task data point and the all-or-none serial prediction line 
 %difference in y-intercepts of best-fitting line and all-or-none line
-% dY = intercept - single1;
+% dY = intercept - singleY;
 % 
 % %compute x-intercept of best-fitting line
 % xIntercept = -1*intercept/slope;
 % %difference between this and the all-or-none's x-intercept (which is simple
 % %single-task accuracy level on x-axis)
-% dX = xIntercept - single2;
+% dX = xIntercept - singleX;
 % 
 % %hypotenuese
 % h = sqrt(dX^2 + dY^2); 
 % %some trig:
 % distFromAllOrNone1 = sqrt(dX^2 - (h/2)^2);
 
-distFromAllOrNone = distanceFromPointToLine(dual2,dual1,slope,single1);
+distFromAllOrNone = distanceFromPointToLine(dualX,dualY,slope,singleY);
 
 %if performance is WORSE than all-or-none model, make this negative
 %difference in y-intercepts of best-fitting line and all-or-none line
-dY = intercept - single1;
+dY = intercept - singleY;
 if dY<0
     distFromAllOrNone = distFromAllOrNone*-1;
+end
+
+%% compute another measure of how serial vs parallel this performance level is: 
+% how far the dual-task point is from the serial model prediction, along a
+% line that connects the dual-task point to the unlimited capacity point 
+% This only works if dual-task accuracy is worse on both sides than
+% single-task accuracy. 
+
+canDoNormDist = dualY<singleY && dualX<singleX;
+
+if canDoNormDist
+
+    %define that line
+    slope2 = (singleY-dualY)/(singleX-dualX);
+    intercept2 = dualY - slope2*dualX; %I = y-slope*x;
+
+    intercept1 = singleY; %y-intersect of the all-or-none serial model line
+
+    %find where that line intersects the serial model
+    intersectX = (intercept2 - intercept1)/(slope-slope2);
+
+    intersectY = slope2*intersectX + intercept2;
+    intersectY2 = slope*intersectX + intercept1;
+    if abs(intersectY-intersectY2)>(10^-15)
+        keyboard
+    end
+
+    %now find the distance of dual-task data point from that point on the
+    %serial model line (the one that is on the same line that ocnnects the data
+    %point to the unlimited capacity parallel point)
+    dist2 = sqrt((dualY - intersectY)^2 + (dualX - intersectX)^2);
+    %if performance is WORSE than all-or-none model, make this negative
+    if dY<0
+        dist2 = -1*dist2;
+    end
+    %and distance from that point to unlimited capacity point
+    wholeDist =  sqrt((singleY - intersectY)^2 + (singleX - intersectX)^2);
+
+    %normalize distance from serial model by that total distance to the
+    %unlimited capacity model
+    normedDistFromAllOrNone = dist2/wholeDist;
+elseif all(dualAccs==singleAccs)
+    normedDistFromAllOrNone = 1;
+else
+    normedDistFromAllOrNone = NaN;
 end
 
 %% plot
@@ -135,34 +189,34 @@ if doPlot
     figure; hold on;
     
     %add 0.5 back to everything 
-    single1 = single1 + chanceLevel;
-    single2 = single2 + chanceLevel;
-    dual1 = dual1 + chanceLevel;
-    dual2 = dual2 + chanceLevel;
+    singleY = singleY + chanceLevel;
+    singleX = singleX + chanceLevel;
+    dualY = dualY + chanceLevel;
+    dualX = dualX + chanceLevel;
     
     %plot box constrained by indepenent processing:
-    plot([single2 single2],[chanceLevel single1],'k-');
-    plot([chanceLevel single2],[single1 single1],'k-');
+    plot([singleX singleX],[chanceLevel singleY],'k-');
+    plot([chanceLevel singleX],[singleY singleY],'k-');
     
     %plot all-or-none serial model. Solve for that equation using x,y
     %coordinates of left single task accuracy:
-    x0 = chanceLevel; y0=single1;
+    x0 = chanceLevel; y0=singleY;
     betaAllOrNone = y0 - slope*chanceLevel;
-    xs = [.5 single2];
+    xs = [.5 singleX];
     ys = slope*xs+betaAllOrNone;
     plot(xs,ys,'k-');
     
     %plot the best-fitting serial model line (fit with pProcessOnlyOne, still free
     %parameter of pAttendTask1)
-    dual2Ignored = (single1-intercept)/slope;
+    dual2Ignored = (singleY-intercept)/slope;
 
-    xs = [dual2Ignored single2];
+    xs = [dual2Ignored singleX];
     ys = slope*xs+intercept;
     plot(xs+chanceLevel,ys+chanceLevel,'r-');
     
     
     %Plot prediction of fixed-capacity parallel processing
-    singleAcc = [single2 single1];
+    singleAcc = [singleX singleY];
     singleDs = sqrt(2)*norminv(singleAcc); %convert to d' (assuming A' is like PC?')
     pSamplesOnTask1 = 0:0.01:1;  %vector of proportion of fixed number of sensory "samples" devited to task 1
     
@@ -188,15 +242,21 @@ if doPlot
     
     
     %plot data:
-    plot(chanceLevel,single1,'b.-','MarkerSize',dataMarkSz);
-    plot(single2,chanceLevel,'b.-','MarkerSize',dataMarkSz);
-    plot(dual2,dual1,'k.','MarkerSize',dataMarkSz)
+    plot(chanceLevel,singleY,'b.-','MarkerSize',dataMarkSz);
+    plot(singleX,chanceLevel,'b.-','MarkerSize',dataMarkSz);
+    plot(dualX,dualY,'k.','MarkerSize',dataMarkSz)
     
     
     %plot the predicted dual-task performance given our 2 parameters:
-    predDual = SerialDualTaskAccGivenSingleTask([single1 single2],pTask1First,pProcessBoth);
+    predDual = SerialDualTaskAccGivenSingleTask([singleY singleX],pTask1First,pProcessBoth);
     plot(predDual(2), predDual(1),'r.','MarkerSize',modelMarkSz);
 
+    %plot the line that connects dual-task point to unlimited capacity 
+    if canDoNormDist
+        someXs = [intersectX singleX];
+        someYs = slope2*someXs + intercept2;
+        plot(someXs+chanceLevel, someYs+chanceLevel, 'g--');
+    end
     axis square;
     xlabel('Right side p(c)');
     ylabel('Left side p(c)');
