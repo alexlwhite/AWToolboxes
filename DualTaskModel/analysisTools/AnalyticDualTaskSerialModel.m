@@ -1,4 +1,4 @@
-%% function [pProcessBoth, pTask1First, slope, intercept, distFromAllOrNone] = AnalyticDualTaskSerialModel(singleAccs, dualAccs, doPlot)
+%% function [pProcessBoth, pTask1First, slope, intercept, distFromAllOrNone, normedDistFromAllOrNone] = AnalyticDualTaskSerialModel(singleAccs, dualAccs, doPlot)
 % by Alex White, 2017
 %
 % Given accuracy (p(correct) or area under ROC curve) in dual and single-task 
