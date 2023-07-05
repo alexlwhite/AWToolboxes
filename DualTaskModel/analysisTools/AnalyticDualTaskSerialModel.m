@@ -1,4 +1,4 @@
-%% function [pProcessBoth, pTask1First, slope, intercept, distFromAllOrNone, normedDistFromAllOrNone] = AnalyticDualTaskSerialModel(singleAccs, dualAccs, doPlot)
+%% function [pProcessBoth, pTask1First, slope, intercept, distFromAllOrNone, spokeDistFromAllOrNone] = AnalyticDualTaskSerialModel(singleAccs, dualAccs, doPlot)
 % by Alex White, 2017
 %
 % Given accuracy (p(correct) or area under ROC curve) in dual and single-task 
@@ -39,7 +39,7 @@
 % - distFromAllOrNone: distance between dual-task data point and the
 %   nearest point on the all-or-none switching model. Negative if data point
 %   is below the line. 
-% - normedDistFromAllOrNone: a normalized measure of distance from serial
+% - spokeDistFromAllOrNone: a normalized measure of distance from serial
 %   model, along the line that connects the dual-task accuracy point to the
 %   unlimited capacity parallel model. This distance is normalized by (i.e., divided by) 
 %   by the total length of the segement of that line betwen the unlimited
@@ -48,7 +48,7 @@
 %   measure can only be computed if both singleAccs<dualAccs. If not, it is
 %   NaN. 
 %
-function [pProcessBoth, pTask1First, slope, intercept, distFromAllOrNone, normedDistFromAllOrNone] = AnalyticDualTaskSerialModel(singleAccs, dualAccs, doPlot, chanceLevel)
+function [pProcessBoth, pTask1First, slope, intercept, distFromAllOrNone, spokeDistFromAllOrNone] = AnalyticDualTaskSerialModel(singleAccs, dualAccs, doPlot, chanceLevel)
 
 if nargin<4
     chanceLevel = 0.5; 
@@ -136,7 +136,7 @@ if dY<0
     distFromAllOrNone = distFromAllOrNone*-1;
 end
 
-%% compute another measure of how serial vs parallel this performance level is: 
+%% compute the "spoke distance": another measure of how serial vs parallel this performance level is: 
 % how far the dual-task point is from the serial model prediction, along a
 % line that connects the dual-task point to the unlimited capacity point 
 % This only works if dual-task accuracy is worse on both sides than
@@ -174,11 +174,11 @@ if canDoNormDist
 
     %normalize distance from serial model by that total distance to the
     %unlimited capacity model
-    normedDistFromAllOrNone = dist2/wholeDist;
+    spokeDistFromAllOrNone = dist2/wholeDist;
 elseif all(dualAccs==singleAccs)
-    normedDistFromAllOrNone = 1;
+    spokeDistFromAllOrNone = 1;
 else
-    normedDistFromAllOrNone = NaN;
+    spokeDistFromAllOrNone = NaN;
 end
 
 %% plot
