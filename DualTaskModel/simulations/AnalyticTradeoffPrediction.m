@@ -1,4 +1,4 @@
-%% try an analytic solution to predict stimulsu processing tradeoff according to the serial model 
+%% try an analytic solution to predict stimulus processing tradeoff according to the serial model 
 % this assumes that when a side is not processed, p(correct) = 0.5. Simple
 % guessing rule. 
 % It's the pure all-or-none model. It never happens that both sides are
