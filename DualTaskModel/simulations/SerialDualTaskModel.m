@@ -51,12 +51,13 @@
 %
 % - corrValsByIndex: structure that indicates what is in each element of dualTaskAccCorr
 %
-% - tradeoffAgs: AROC values in the dual-task condition, separated by whether the other
+% - tradeoffAgs: a 1x2 vector of AROC values in the dual-task condition, separated by whether the other
 % side's response was incorrect or correct
 %
+% - dualTask_propNumCorrctResp: a 1x3 vector that listss the proportion of
+% dual-task trials with 0, 1 or 2 correct responses. 
 
-
-function [Ag, AgValsByIndex, dualTaskAccCorr, corrValsByIndex, tradeoffAgs] = SerialDualTaskModel(attndStim1Mean, attndStim2Mean, pStim1First, pProcessBoth, nT)
+function [Ag, AgValsByIndex, dualTaskAccCorr, corrValsByIndex, tradeoffAgs, dualTask_propNumCorrctResp] = SerialDualTaskModel(attndStim1Mean, attndStim2Mean, pStim1First, pProcessBoth, nT)
 
 %% parameters
 
@@ -109,20 +110,20 @@ pProcess2Only = (1-pProcessBoth)*(1-pStim1First);
 %what should the mean be for "ignored" stimuli? lets set it to a "default" distribution midway between
 %the target-present and target-absent distribution, for each side
 evidenceMeanIgnored = mean([attndStim1Mean targAbstMean;
-    attndStim2Mean targAbstMean], 2);
+                            attndStim2Mean targAbstMean], 2);
 
 %orrr it's the target absent distribution
 %evidenceMeanIgnored = [targAbstMean targAbstMean];
 
 
 presMs = [attndStim1Mean evidenceMeanIgnored(1); ...  %single-task side 1
-    evidenceMeanIgnored(2) attndStim2Mean; ... %single-task side 2
-    attndStim1Mean attndStim2Mean];       %dual-task
+          evidenceMeanIgnored(2) attndStim2Mean; ... %single-task side 2
+          attndStim1Mean attndStim2Mean];       %dual-task
 
 %Standard deviations:
 presSDs = [sigmaAttn sigmaIgnr; ...
-    sigmaIgnr sigmaAttn; ...
-    sigmaAttn sigmaAttn];
+          sigmaIgnr sigmaAttn; ...
+          sigmaAttn sigmaAttn];
 
 
 
@@ -248,6 +249,10 @@ for condi = 1:nCueConds
             [hr,fr] = computeROCRates(thisSidePres(otherCorrTrials),thisSideResp(otherCorrTrials),1:nRespLevs);
             tradeoffAgs(otherCorrI) = computeAROC(hr,fr);
         end
+
+        %% also compute proportions of dual-task trials with 0, 1 or 2 correct responses
+        nCorrect = sum(respCorrect, 2);
+        dualTask_propNumCorrctResp  = [mean(nCorrect==0) mean(nCorrect==1) mean(nCorrect==2)];
         
         %% Correlations: Compute correlations in accuracy for dual-task responses, depending on target presence on the two sides
         
