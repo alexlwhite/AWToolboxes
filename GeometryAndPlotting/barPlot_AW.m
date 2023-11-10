@@ -161,7 +161,7 @@ hold on;
 handles = zeros(n1,n2);
 
 if prod(opt.ylims)<0
-    plot(xlims,[0 0],'k-');
+    plot(xlims,[0 0],'k-','LineWidth',1);
 end
 
 %set the bottom of the bars (for cleaner plotting):
