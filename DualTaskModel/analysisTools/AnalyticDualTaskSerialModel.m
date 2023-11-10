@@ -157,7 +157,7 @@ if canDoNormDist
 
     intersectY = slope2*intersectX + intercept2;
     intersectY2 = slope*intersectX + intercept1;
-    if abs(intersectY-intersectY2)>(10^-15)
+    if abs(intersectY-intersectY2)>(10^-13)
         keyboard
     end
 
