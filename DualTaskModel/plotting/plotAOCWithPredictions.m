@@ -53,6 +53,11 @@ end
 if ~isfield(plotOpt,'doLegend')
     plotOpt.doLegend = true;
 end
+
+if ~isfield(plotOpt,'legendLoc')
+    plotOpt.legendLoc = 'NorthWest';
+end
+
 if ~isfield(plotOpt,'doAxLabels')
     plotOpt.doAxLabels = true;
 end
@@ -238,6 +243,6 @@ end
 axis square;
 
 if plotOpt.doLegend
-    legend([hSing hDual],{'Single-task','Dual-task'},'Location','NorthWest'); legend boxoff;
+    legend([hSing hDual],{'Single-task','Dual-task'},'Location',plotOpt.legendLoc); legend boxoff;
 end
 
