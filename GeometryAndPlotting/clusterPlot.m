@@ -1,4 +1,4 @@
-%% function  [barCenters, opt, legendIcons] = clusterPlot_AW(ds, opt)
+%% function  [barCenters, opt, legendIcons] = clusterPlot(ds, opt)
 % Alex White's function to make a version of a bar plot that has individual data points in clusters.
 %
 % Inputs:

@@ -17,6 +17,7 @@
 %    barWidth
 %    edgeLineWidth
 %    errorBarWidth
+%    errorBarSeriph
 %    fillColors
 %    edgeColors
 %    errorBarColors
@@ -69,6 +70,12 @@ if isempty(eb)
 else
     doErrorBar = true;
     symmetricErrorBar = numel(eb)==numel(ds);
+
+    %whether to add "seriphs" to error bars. Default is only to add them if
+    %we have a not symmetric error bar, i.e., a CI rather than a SEM
+    if ~isfield(opt, 'errorBarSeriph')
+        opt.errorBarSeriph = ~symmetricErrorBar;
+    end
 end
 
 if ~isfield(opt,'ylims')
@@ -191,7 +198,15 @@ for i1 = 1:n1
                 plot([1 1]*barCenters(i1,i2), ds(i1,i2)+[-1 1]*eb(i1,i2), '-', 'Color', squeeze(opt.errorBarColors(i1,i2,:)), 'LineWidth', opt.errorBarWidth);
             else
                 plot([1 1]*barCenters(i1,i2), squeeze(eb(i1,i2,:)),'-','Color', squeeze(opt.errorBarColors(i1,i2,:)), 'LineWidth', opt.errorBarWidth);
+                if opt.errorBarSeriph
+                    serx = barCenters(i1, i2)+[-1 1]*0.25*opt.barWidth;
+                    for tb=1:2
+                        sery = [1 1]*eb(i1, i2, tb);
+                        plot(serx, sery, '-', 'Color', squeeze(opt.errorBarColors(i1,i2,:)), 'LineWidth', opt.errorBarWidth);
+                    end
+                end
             end
+            
         end
     end
 end
