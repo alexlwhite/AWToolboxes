@@ -44,7 +44,7 @@ if nargin<4
     CIRange = 95;
 end
 if nargin<5
-    nReps = 1000;
+    nReps = 5000;
 end
 if nargin<6
     compVal = 0;
