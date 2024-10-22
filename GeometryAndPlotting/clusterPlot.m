@@ -118,6 +118,14 @@ end
 if ~isfield(opt,'errorBarWidth')
     opt.errorBarWidth = 1;
 end
+
+%whether to have little horizontal line serifs at the end of the error bar;
+%this is default for a confidence interval
+if ~isfield(opt,'errorBarSerifs')
+    opt.errorBarSerifs = ~opt.symmetricErrorBar;
+end
+
+
 if ~isfield(opt, 'legendTitle')
     opt.legendTitle = '';
 end
@@ -352,7 +360,7 @@ hold on;
 handles = zeros(n1,n2);
 
 if prod(opt.ylims)<0
-    plot(xlims,[0 0],'k-');
+    plot(xlims,[0 0],'k-','LineWidth',1);
 end
 
 %if requested, plot lines connecting matched data points
@@ -447,6 +455,12 @@ for i1 = 1:n1
                 
                 if strcmp(opt.errorBarType, 'line')
                     plot([1 1]*barCenters(i1,i2), CI,'-','Color', squeeze(opt.errorBarColors(i1,i2,:)), 'LineWidth', opt.errorBarWidth);
+                    %add "serifs" 
+                    if opt.errorBarSerifs
+                        for td = 1:2
+                            plot(barCenters(i1, i2)+[-1 1]*0.02*diff(xlims), CI([td td]),'-','Color', squeeze(opt.errorBarColors(i1,i2,:)), 'LineWidth', opt.errorBarWidth);
+                        end
+                    end
                 elseif strcmp(opt.errorBarType, 'box')
                     rectWid = opt.barWidth;
                     rectX = barCenters(i1,i2)-rectWid/2;
