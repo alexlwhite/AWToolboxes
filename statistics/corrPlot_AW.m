@@ -1,9 +1,12 @@
-function corrPlot_AW(D, vars)
+function corrPlot_AW(D, vars, doPartial)
 
 nV = size(D,2);
 
-[rhos, pvals] = corr(D);
-
+if ~doPartial
+    [rhos, pvals] = corr(D);
+else
+    [rhos, pvals] = partialcorr(D);
+end
 figure; 
 
 for ri = 1:nV
