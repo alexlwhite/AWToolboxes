@@ -1,3 +1,14 @@
+%% function printLmeRes(lme, sf, printANOVA)
+% prints to a text file the results of a linear mixed effects model fit. 
+% Inputs: 
+% - lme: the object output by fitlme or fitglme
+% - sf: a handle to the file to print to (if 1, then it prints to command
+% window) 
+% - printANOVA: true or false, whether to also print the ANOVA-formatted
+% results. 
+%
+% By Alex White, at Barnard College 
+
 function printLmeRes(lme, sf, printANOVA)
 
 if nargin<3
