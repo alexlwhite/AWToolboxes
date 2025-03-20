@@ -15,7 +15,8 @@
 % 
 % Outputs: 
 % - fs: a vector of mean ngram frequencies, one for each character string
-%   in "ngrams"
+%   in "ngrams". 
+%    If an item is not found, its frequency is set to NaN. 
 % 
 % By Alex White, at Barnard College, 2025
 
@@ -24,7 +25,7 @@ function fs = getMultNGramsFreq(ngrams, startYear, endYear, corpus, smoothing, c
 
 %deal with spaces in the input ngram:
 spacer = '%20';
-webOpts = weboptions('Timeout',15);
+webOpts = weboptions('Timeout',25);
 
 if ~iscell(ngrams)
     ngrams = {ngrams};
@@ -54,7 +55,7 @@ data = webread(url, webOpts);
 fs = zeros(size(ngrams));
 
 if isempty(data) %empty data means nothing found?
-    fs = 0;
+    fs = NaN;
 else
     if iscell(data)
         names = cell(size(data));
@@ -76,7 +77,7 @@ else
                 fs(gi) = mean(data{thisOne}.timeseries);
 
             elseif isempty(thisOne)
-                fs(gi)=0;
+                fs(gi)=NaN;
                 fprintf('\nNGram %s not found\n', ngrams{gi});
             else
                 keyboard
@@ -99,7 +100,7 @@ else
                 fs(gi) = mean(data(thisOne).timeseries);
 
             elseif isempty(thisOne)
-                fs(gi)=0;
+                fs(gi)=NaN;
                 fprintf('\nNGram %s not found\n', ngrams{gi});
             else
                 keyboard
