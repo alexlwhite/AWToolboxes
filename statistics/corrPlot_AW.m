@@ -1,11 +1,34 @@
-function corrPlot_AW(D, vars, doPartial)
+%% function corrPlot_AW(D, vars, doPartial)
+% Makes a plot of correlation matrix, like matlab's corrplot function. 
+% Inputs: 
+% - D: matrix of data like you might but into the "corr" function, with
+%  observations in rows and variables in columns. This function computes and
+%  plots pairwise correlations between all pairs of columns. 
+% 
+% - vars: cell array containing the names of each column
+% 
+% - doPartial: whether to use partialcorr (if true) or corr function (if
+% false). partialcorr returns the sample linear partial correlation coefficients between 
+% pairs of variables in D, controlling for the remaining variables in D.  
+% 
+% - nanRowOption: the "rows" variable for corr,  If "all" then, corr tries
+% to use all rows. If "complete", use only rows of the input with no
+% missing values; if "pairwise", compute rho(i,j) using rows with no missing values in column i or j.
+
+function [rhos, pvals] = corrPlot_AW(D, vars, doPartial, nanRowOption)
 
 nV = size(D,2);
 
+
+if ~exist('nanRowOption', 'var')
+    nanRowOption = 'complete';
+end
+
+
 if ~doPartial
-    [rhos, pvals] = corr(D);
+    [rhos, pvals] = corr(D, 'Rows', nanRowOption);
 else
-    [rhos, pvals] = partialcorr(D);
+    [rhos, pvals] = partialcorr(D, 'Rows', nanRowOption);
 end
 figure; 
 
