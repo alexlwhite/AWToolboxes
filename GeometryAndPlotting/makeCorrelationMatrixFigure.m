@@ -1,5 +1,5 @@
 function makeCorrelationMatrixFigure(rhos, pvals, xLabs, yLabs, addColorBar, maxR)
-
+ 
 %% setup colormap
 twoHues = [179 348]/360;
 Ns = [100 101];
@@ -17,6 +17,7 @@ end
 nanColr = [1 1 1];
 nanRho = -maxR-0.1;
 
+
 emptyCells = isnan(rhos);
 if any(emptyCells(:))
     rhos(emptyCells) = nanRho;
@@ -24,10 +25,15 @@ if any(emptyCells(:))
 end
 lineColr = [0 0 0];
 
-%% make figure 
+
+
+%% make figure -- oddly typing "hold on" before the imagesc command flips the dimensions! 
+
 imagesc(rhos,[-maxR maxR]);
 colormap(myColrs);
 if addColorBar, colorbar; end
+
+hold on;
 
 nX = length(xLabs);
 nY = length(yLabs);
