@@ -43,6 +43,17 @@ msPerSample = 1000/samrat; %milliseconds per sample
 
 eyeX = edf.Samples.posX(intime);
 eyeY = edf.Samples.posY(intime);
+
+%% If binocular tracking, average over the two eyes (maybe silly!)
+if size(eyeX,2)==2
+    eyeX = mean(eyeX,2);
+    eyeY = mean(eyeY,2);
+
+    fprintf(1,'\n(%s) KLUGE! Averaging over left and right eye traces!\n', mfilename);
+    pause(1);
+end
+        
+
 pupSz = edf.Samples.pupilSize(intime);
 
 %detect blinks as pupil size is 0 or NaN (different edf processing tools
