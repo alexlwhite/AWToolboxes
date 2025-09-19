@@ -17,7 +17,7 @@
 function [bootCI, bootP, meanCorrDiff] = corrDiffsBootstrap(pair1, pair2)
 
 
-nBoot = 10000;
+nBoot = 100000;
 N = size(pair1,1);
 if size(pair2,1)~=N
     error('Pairs dont have same sample size');
