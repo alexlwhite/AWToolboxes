@@ -1,7 +1,7 @@
 %% function [medPos, meanPos, goodTimes, blinkCutTimes, noBlinkIntervals, pDataRemainAfterBlinkCut] = computeGazePosAndBlinks(time1, time2, edf)
 % This function finds blinks in a sequence of gaze positions and computes
 % the median gaze position (excluding periods with blinks). Blinks are
-% detected because pupil size is 0. Or NaN is you want! 
+% detected because pupil size is 0 or NaN.
 %
 % Inputs:
 % - time1: starting time to analyze, in units used by edf.Samples.time
@@ -29,15 +29,12 @@
 function [medPos, meanPos, goodTimes, blinkCutTimes, noBlinkIntervals, pDataRemainAfterBlinkCut, pupilMissingTimes] = computeGazePosAndBlinks(time1, time2, edf)
 
 
-doPlot = false;
+doPlot = true;
 
 %some things are hard-coded: 
 beforeBlinkBuffer = 100; %ms before blink starts to consider cutting (eventually depends on eye velocity)
 afterBlinkBuffer = 120; %ms after blink starts to consider cutting (eventually depends on eye velocity)
-minBuffer = 20;
-
-%whether to count NaN pupil size as a blink, or just 9. 
-countNaNPupilAsBlink = false 
+minBuffer = 10;
 
 maxYVelForCut = 0.5; % cutoff y-velocity in pix/ms to consider as when the eye starts or stops moving due to blink artifact 
 
@@ -64,10 +61,8 @@ pupSz = edf.Samples.pupilSize(intime);
 
 %detect blinks as pupil size is 0 or NaN (different edf processing tools
 %either insert a 0 or leave as NaN
-isBlink = (pupSz <= 0); 
-if countNaNPupilAsBlink
-    isBlink = isBlink | isnan(pupSz);
-end
+isBlink = (pupSz <= 0) | isnan(pupSz);
+
 %find onset and offset of blinks
 blinkOn = false; blinkCount = 0;
 blinkOnsetIs = []; blinkOffsetIs = [];
@@ -130,12 +125,10 @@ if blinkCount>0
             zeroTimesBeforeShut = min(zeroVelTimes - blinkOnsetIs(bci));
         end
         %start at the last time the y velocity was 0
-        startCutBuffer = min([-minBuffer max(zeroTimesBeforeShut)]);
+        startCutBuffer = min([0 max(zeroTimesBeforeShut)]);
         if startCutBuffer>0, keyboard; end
         if ~isempty(startCutBuffer)
             startCutT = blinkOnsetIs(bci)+startCutBuffer; %add a negative number 
-            %can't cut out more data than we have: 
-            if startCutT<1, startCutT =1; end
         else
             startCutT = blinkOnsetIs(bci);
         end
@@ -152,8 +145,6 @@ if blinkCount>0
         endCutBuffer = max([minBuffer min(zeroTimesAfterShut)]); %must be positive 
         if ~isempty(endCutBuffer)
             endCutT = blinkOffsetIs(bci)+endCutBuffer;
-            %can't cut out more data than we have: 
-            if endCutT>length(eyeX), endCutT = length(times); end
         else
             endCutT = blinkOffsetIs(bci);
         end
@@ -272,4 +263,5 @@ if doPlot & nBlinks>0
         ylim(ylims);
     end
 
+    keyboard
 end
