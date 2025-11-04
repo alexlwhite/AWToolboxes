@@ -67,10 +67,13 @@ tStat.pval = tp;
 bayesFactor = bf.ttest(diffs);
 if doWeighted
     [CI, sampleMean] = boyntonBootstrap(meanFun, diffs, nReps,CIRange,BCFlag,weights); 
+    sampleSEM = standardError(diffs, ndims(diffs), weights);
+
 else
     [CI, sampleMean] = boyntonBootstrap(meanFun, diffs, nReps,CIRange,BCFlag);
+    sampleSEM = standardError(diffs, ndims(diffs));
+
 end
-sampleSEM = standardError(diffs, ndims(diffs), weights);
 
 
 %% print
