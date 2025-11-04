@@ -1,5 +1,5 @@
-nRows = 14;
-nCols = 15; 
+nRows = 4;
+nCols = 5; 
 
 nC = nRows*nCols;
 
@@ -11,7 +11,7 @@ for c = 1:nC
     
     [colI, rowI] = ind2sub([nCols nRows], c);
     
-    %text(0, 0, sprintf('row=%i, col=%i', rowI, colI));
+    text(0, 0, sprintf('row=%i, col=%i', rowI, colI));
     
     xlim([-2 2]); ylim([-2 2]);
     axis off;
