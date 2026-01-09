@@ -1,7 +1,8 @@
-%% function [medPos, meanPos, goodTimes, blinkCutTimes, noBlinkIntervals, pDataRemainAfterBlinkCut] = computeGazePosAndBlinks(time1, time2, edf)
+%% function [medPos, meanPos, goodTimes, blinkCutTimes, noBlinkIntervals, pDataRemainAfterBlinkCut] = computeBinocGazePosAndBlinks(time1, time2, edf)
 % This function finds blinks in a sequence of gaze positions and computes
-% the median gaze position (excluding periods with blinks). Blinks are
-% detected because pupil size is 0 or NaN.
+% the median gaze position (excluding periods with blinks). This version takes in binocular gaze position data, 
+% so estimates median gaze position for left and right eye. 
+% Blinks are detected because pupil size is 0. Or NaN if you want! 
 %
 % Inputs:
 % - time1: starting time to analyze, in units used by edf.Samples.time
@@ -10,8 +11,10 @@
 %
 %
 % Outputs
-% - medPos: 1x2 vector, median [horizontal, vertical] gaze position, in PIXELS (from edf.Samples.posX)
-% - meanPos: 1x2 vecotr, [horizontal, vertical] gaze position, in PIXELS (from edf.Samples.posX)
+% - medPos: 2x2 vector, median gaze position, in PIXELS (from edf.Samples.posX). 
+%    Rows = [left eye; right eye]; Columns = [horizontal, vertical]
+% - meanPos: 2x2 vector, mean gaze position, in PIXELS (from edf.Samples.posX)
+%    Rows = [left eye; right eye]; Columns = [horizontal, vertical]
 % - goodTimes: a 1xT vector of Boolean values, which is true except during
 % intervals with blinks. T is the number of samples in the interval to be
 % analyzed.
@@ -26,15 +29,17 @@
 % - pupilMissingTimes: a Bx2 matrix that defines start and end times of each blink
 % (when pupil size is missing.   These times are absolute values from edf.Samples.time.
 % Note: the edf file aslo has blinksEvents.eBlink!
-function [medPos, meanPos, goodTimes, blinkCutTimes, noBlinkIntervals, pDataRemainAfterBlinkCut, pupilMissingTimes] = computeGazePosAndBlinks(time1, time2, edf)
+function [medPos, meanPos, goodTimes, blinkCutTimes, noBlinkIntervals, pDataRemainAfterBlinkCut, pupilMissingTimes] = computeBinocGazePosAndBlinks(time1, time2, edf)
 
-
-doPlot = true;
+doPlot = false;
 
 %some things are hard-coded: 
 beforeBlinkBuffer = 100; %ms before blink starts to consider cutting (eventually depends on eye velocity)
 afterBlinkBuffer = 120; %ms after blink starts to consider cutting (eventually depends on eye velocity)
-minBuffer = 10;
+minBuffer = 20;
+
+%whether to count NaN pupil size as a blink, or just 0. 
+countNaNPupilAsBlink = false 
 
 maxYVelForCut = 0.5; % cutoff y-velocity in pix/ms to consider as when the eye starts or stops moving due to blink artifact 
 
@@ -44,25 +49,17 @@ times = edf.Samples.time(intime);
 samrat = round(1000/mean(diff(times)));
 msPerSample = 1000/samrat; %milliseconds per sample
 
-eyeX = edf.Samples.posX(intime);
-eyeY = edf.Samples.posY(intime);
-
-%% If binocular tracking, average over the two eyes (maybe silly!)
-if size(eyeX,2)==2
-    eyeX = mean(eyeX,2);
-    eyeY = mean(eyeY,2);
-
-    fprintf(1,'\n(%s) KLUGE! Averaging over left and right eye traces!\n', mfilename);
-    pause(1);
-end
-        
+eyeX = edf.Samples.posX(intime, :);
+eyeY = edf.Samples.posY(intime, :);
 
 pupSz = edf.Samples.pupilSize(intime);
 
 %detect blinks as pupil size is 0 or NaN (different edf processing tools
 %either insert a 0 or leave as NaN
-isBlink = (pupSz <= 0) | isnan(pupSz);
-
+isBlink = (pupSz <= 0); 
+if countNaNPupilAsBlink
+    isBlink = isBlink | isnan(pupSz);
+end
 %find onset and offset of blinks
 blinkOn = false; blinkCount = 0;
 blinkOnsetIs = []; blinkOffsetIs = [];
@@ -111,7 +108,8 @@ if blinkCount>0
         thisBlinkTimes = minT:maxT;
         
         %compute velocity of vertical gaze position in that inverval containing a blink: 
-        yvels = [1; diff(eyeY(thisBlinkTimes))/msPerSample];
+        %average over the 2 eyes for this
+        yvels = [1; diff(mean(eyeY(thisBlinkTimes,:),2))/msPerSample];
 
         %find when the y-velocity went to zero 
         zeroVelTimes = thisBlinkTimes(abs(yvels)<maxYVelForCut); %sometimes the velocity cross 0 but due to sampling doesnt quite reach 0, so we'll take 0.5 pix per ms as cutoff
@@ -125,10 +123,12 @@ if blinkCount>0
             zeroTimesBeforeShut = min(zeroVelTimes - blinkOnsetIs(bci));
         end
         %start at the last time the y velocity was 0
-        startCutBuffer = min([0 max(zeroTimesBeforeShut)]);
+        startCutBuffer = min([-minBuffer max(zeroTimesBeforeShut)]);
         if startCutBuffer>0, keyboard; end
         if ~isempty(startCutBuffer)
             startCutT = blinkOnsetIs(bci)+startCutBuffer; %add a negative number 
+            %can't cut out more data than we have: 
+            if startCutT<1, startCutT =1; end
         else
             startCutT = blinkOnsetIs(bci);
         end
@@ -145,6 +145,8 @@ if blinkCount>0
         endCutBuffer = max([minBuffer min(zeroTimesAfterShut)]); %must be positive 
         if ~isempty(endCutBuffer)
             endCutT = blinkOffsetIs(bci)+endCutBuffer;
+            %can't cut out more data than we have: 
+            if endCutT>size(eyeX,1), endCutT = length(times); end
         else
             endCutT = blinkOffsetIs(bci);
         end
@@ -152,8 +154,8 @@ if blinkCount>0
         if doPlot
             figure(newfig); clf;
             subplot(2,1,1); hold on;
-            plot(thisBlinkTimes, eyeY(thisBlinkTimes), 'b-');
-            plot([startCutT endCutT], eyeY([startCutT endCutT]), 'b.', 'MarkerSize', 8);
+            plot(thisBlinkTimes, eyeY(thisBlinkTimes, :), 'b-');
+            plot([startCutT endCutT], eyeY([startCutT endCutT], :), 'b.', 'MarkerSize', 8);
             xlim([minT maxT]);
             xlabel('time'); ylabel('y position');
             
@@ -225,16 +227,17 @@ end
 pDataRemainAfterBlinkCut = mean(goodTimes);
 
 %compute median gaze position, excluding blinks
-medX = median(eyeX(goodTimes));
-medY = median(eyeY(goodTimes));
+medX = median(eyeX(goodTimes, :), 1);
+medY = median(eyeY(goodTimes, :), 1);
 
-medPos = [medX medY];
+medPos = [medX' medY']; %%    Rows = [left eye; right eye]; Columns = [horizontal, vertical]
+
 
 %and the mean
-meanX = mean(eyeX(goodTimes));
-meanY = mean(eyeY(goodTimes));
+meanX = mean(eyeX(goodTimes, :),1);
+meanY = mean(eyeY(goodTimes, :), 1);
 
-meanPos = [meanX meanY];
+meanPos = [meanX' meanY']; %Rows = [left eye; right eye]; Columns = [horizontal, vertical]
 
 %% plot
 if doPlot & nBlinks>0
@@ -243,7 +246,7 @@ if doPlot & nBlinks>0
     plot(times, eyeY, 'b-');
     plot(times, pupSz, 'g-');
 
-    ylims = [0 max([max(pupSz) max(eyeY)])];
+    ylims = [0 max([max(pupSz) max(eyeY(:))])];
 
     for bi=1:size(pupilMissingTimes,1)
         plot(pupilMissingTimes([bi bi],1), ylims, 'k-');
@@ -263,5 +266,4 @@ if doPlot & nBlinks>0
         ylim(ylims);
     end
 
-    keyboard
 end

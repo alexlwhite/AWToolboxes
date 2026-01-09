@@ -1,7 +1,7 @@
 %% function [medPos, meanPos, goodTimes, blinkCutTimes, noBlinkIntervals, pDataRemainAfterBlinkCut] = computeGazePosAndBlinks(time1, time2, edf)
 % This function finds blinks in a sequence of gaze positions and computes
 % the median gaze position (excluding periods with blinks). Blinks are
-% detected because pupil size is 0. Or NaN is you want! 
+% detected because pupil size is 0. Or NaN if you want! 
 %
 % Inputs:
 % - time1: starting time to analyze, in units used by edf.Samples.time
@@ -36,7 +36,7 @@ beforeBlinkBuffer = 100; %ms before blink starts to consider cutting (eventually
 afterBlinkBuffer = 120; %ms after blink starts to consider cutting (eventually depends on eye velocity)
 minBuffer = 20;
 
-%whether to count NaN pupil size as a blink, or just 9. 
+%whether to count NaN pupil size as a blink, or just 0. 
 countNaNPupilAsBlink = false 
 
 maxYVelForCut = 0.5; % cutoff y-velocity in pix/ms to consider as when the eye starts or stops moving due to blink artifact 
@@ -57,8 +57,7 @@ if size(eyeX,2)==2
 
     fprintf(1,'\n(%s) KLUGE! Averaging over left and right eye traces!\n', mfilename);
     pause(1);
-end
-        
+end        
 
 pupSz = edf.Samples.pupilSize(intime);
 
