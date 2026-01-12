@@ -21,6 +21,8 @@ if isempty(sacl) || isempty(sacr)
     return;
 end
 
+doPlot = false;
+
 % 1. Determine the temporal clusters (times where either eye is moving)
 maxTime = max([max(sacl.offsetSample), max(sacr.offsetSample)]);
 %make s, a vector of time with 1s whenever a microsaccade was happening in either eye
@@ -124,6 +126,27 @@ if ~isempty(tempBinoc)
 
 else
     msac = table();
+end
+
+%% plot
+if doPlot
+    figure(5); clf; hold on;
+    hl = []; hr=[]; hb=[];
+    for i = 1:height(sacl)
+        hl=plot(sacl.onsetSample(i):sacl.offsetSample(i), ones(1,sacl.offsetSample(i)-sacl.onsetSample(i)+1)*sacl.amp(i),'b.-');
+    end
+    for i = 1:height(sacr)
+        hr=plot(sacr.onsetSample(i):sacr.offsetSample(i), ones(1,sacr.offsetSample(i)-sacr.onsetSample(i)+1)*sacr.amp(i),'r.-');
+    end
+    for i=1:height(msac)
+        hb=plot(msac.onsetSample(i):msac.offsetSample(i), ones(1,msac.offsetSample(i)-msac.onsetSample(i)+1)*msac.amp(i),'g.-');
+    end
+    
+    xlabel('Time (samples)'); ylabel('Saccade amplitude');
+    legend([hl hr hb], {'Left eye','Right eye','Binocular'});
+    pause
+
+
 end
 
 end
