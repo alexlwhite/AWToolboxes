@@ -22,6 +22,7 @@ function saccTable = detectSaccades(postns,vel,velThresh,minDur,mergeInterval)
 %  saccTable, a table with 1 row per saccade. Colums:
 %    - onsetSample, time of saccade onset in samples;
 %    - offsetSample, time of saccade offset in samples;
+%    - duration_Samples, duration in number of samples;
 %    - peakVelocity, in deg/s (or pix/s, if input postns is in pixels)
 %    - startX, starting horizontal position (in same coordinate frame as input postns)
 %    - endX, ending horizontal position
@@ -46,6 +47,7 @@ radiusY = velThresh(2);
 % compute test criterion: ellipse equation:
 %test>1 if the velocity exceeds the criterion
 test = (vel(:,1)/radiusX).^2 + (vel(:,2)/radiusY).^2;
+
 %indx: times when the velocity exceeded the criterion
 indx = find(test>1);
 
@@ -112,6 +114,7 @@ saccTable = table;
 if nsac>0
     saccTable.onsetSample = sacc(:,1);
     saccTable.offsetSample = sacc(:,2);
+    saccTable.duration_Samples = saccTable.offsetSample - saccTable.onsetSample + 1;
     
     emptyVec = NaN(size(saccTable.onsetSample));
     saccTable.peakVelocity  = emptyVec;
@@ -185,17 +188,32 @@ if nsac>0
         
         
         if doPlot
-            figure; subplot(2,1,1); hold on;
+            isToPlot = (sacc(s,1)-5):(sacc(s,2)+5);
+
+            figure; subplot(3,1,1); hold on;
             xs=[saccTable.startX(s) saccTable.endX(s)];
             ys=[saccTable.startY(s) saccTable.endY(s)];
             predys = xs*slope+intercept;
             plot(xs, ys, 'bo');
             plot(xs,predys,'k-');
-            plot(postns(is,1), postns(is,2), 'r.');
+            plot(postns(isToPlot,1), postns(isToPlot,2), 'r.-');
+            xlabel('horizontal gaze position during saccade');
+            ylabel('vertical gaze position during saccade')
+
+            subplot(3,1,2); hold on;
+            hl=plot(isToPlot, vel(isToPlot,1), 'b.-');
+            plot(is, vel(is,1), 'b.-','LineWidth',3);
+            hr=plot(isToPlot, vel(isToPlot,2), 'k.-');
+            plot(is, vel(is,2), 'k.-','LineWidth',3);
+            xlabel('Sample number');
+            ylabel('Velocity');
+            legend([hl hr], {'Horiz','Vert'});
             
-            subplot(2,1,2); hold on;
+
+            subplot(3,1,3); hold on;
             plot(is, curveDists, 'g.-');
-            plot(is, smoothDists, 'r.-');
+            plot(is, smoothDists, 'b.-');
+            xlabel('Sample number'); ylabel('eye movement curvature) ')
             keyboard
         end
        
@@ -205,6 +223,10 @@ if nsac>0
     %amp: amplitude of saccade, distance from starting to ending point 
     saccTable.amp = sqrt(saccTable.dx.^2 + saccTable.dy.^2);
     
+    %ampTotal: total amplitude including all deviations during the
+    %high-velocity event 
+    saccTable.ampTotal = sqrt(saccTable.totalAmpX.^2 + saccTable.totalAmpX.^2);
+
     
     %curve ratio: max deviation from straight line, devided by amp
     saccTable.curveRatio = saccTable.maxCurveDeviation./saccTable.amp;
