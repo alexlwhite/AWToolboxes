@@ -35,7 +35,7 @@ doPlot = false;
 
 %some things are hard-coded:
 beforeBlinkBuffer = 100; %ms before blink starts to consider cutting (eventually depends on eye velocity)
-afterBlinkBuffer = 120; %ms after blink starts to consider cutting (eventually depends on eye velocity)
+afterBlinkBuffer = 130; %ms after blink starts to consider cutting (eventually depends on eye velocity)
 minBuffer = 20;
 
 %whether to count NaN pupil size as a blink, or just 0.
@@ -52,7 +52,10 @@ msPerSample = 1000/samrat; %milliseconds per sample
 eyeX = edf.Samples.posX(intime, :);
 eyeY = edf.Samples.posY(intime, :);
 
-bothYVels = [1 1; diff(eyeY,1,1)/msPerSample];
+isBinoc = size(eyeX, 2)>1;
+
+%bothYVels = [1 1; diff(eyeY,1,1)/msPerSample];
+bothYVels = vecvel(eyeY, samrat, 2);
 
 
 pupSz = edf.Samples.pupilSize(intime, :);
@@ -62,6 +65,10 @@ pupSz = edf.Samples.pupilSize(intime, :);
 isBlink = any(pupSz <= 0, 2);
 if countNaNPupilAsBlink
     isBlink = isBlink | isnan(pupSz);
+else
+    if any(isnan(pupSz))
+        keyboard
+    end
 end
 %find onset and offset of blinks
 blinkOn = false; blinkCount = 0;
@@ -113,55 +120,98 @@ if blinkCount>0
         startCutTs = NaN(1,2);
         endCutTs = NaN(1,2);
 
-        for eye=1:2 %loop thru eyes
 
-            %compute velocity of vertical gaze position  
-
-            yvels = [1; diff(eyeY(thisBlinkTimes,eye),1,1)/msPerSample];
-
-            %find when the y-velocity went to zero
-            zeroVelTimes = thisBlinkTimes(abs(yvels)<maxYVelForCut); %sometimes the velocity cross 0 but due to sampling doesnt quite reach 0, so we'll take 0.25 pix per ms as cutoff
-
-            %time when the blink distortions started: latest time before signal
-            %disappears when y velocity was 0
-            zeroTimesBeforeShut = zeroVelTimes - blinkOnsetIs(bci);
-
-            zeroTimesBeforeShut = zeroTimesBeforeShut(zeroTimesBeforeShut<(-minBuffer));
-            if isempty(zeroTimesBeforeShut)
-                zeroTimesBeforeShut = min(zeroVelTimes - blinkOnsetIs(bci));
-            end
-            %start at the last time the y velocity was 0
-            startCutBuffer = min([-minBuffer max(zeroTimesBeforeShut)]);
-            if startCutBuffer>0, keyboard; end
-            if ~isempty(startCutBuffer)
-                startCutT = blinkOnsetIs(bci)+startCutBuffer; %add a negative number
-                %can't cut out more data than we have:
-                if startCutT<1, startCutT =1; end
-            else
-                startCutT = blinkOnsetIs(bci);
+        if isBinoc
+            %check if both eyes blinked or if this was just missing data in
+            %one eye
+            thesePSz = pupSz(blinkOnsetIs(bci):blinkOffsetIs(bci),:);
+            theseBlink = thesePSz==0;
+            if countNaNPupilAsBlink
+                theseBlink = theseBlink | isnan(thesePSz);
             end
 
-            startCutTs(eye) = startCutT;
+            %realBlink: true if both eyes have pupil size missing at same
+            %time. False if only one eye does.
+            %If true, then we try to cut out a section around the blink,
+            %based on distortions to vertical gaze position.
+            %If false, we just cut out the section with missing data.
+            realBlink = any(theseBlink(:,1) & theseBlink(:,2));
 
-            %time when the blink distortions stopped: earliest time after
-            %singal disappears when y velocity was 0
-            zeroTimesAfterShut = zeroVelTimes - blinkOffsetIs(bci);
-            zeroTimesAfterShut = zeroTimesAfterShut(zeroTimesAfterShut>(minBuffer));
-            if isempty(zeroTimesAfterShut)
-                zeroTimesAfterShut = max(zeroVelTimes - blinkOffsetIs(bci));
+        else
+            realBlink = true;
+        end
+
+
+        % if this seems to not be a real blink of both eyes, but rather a
+        % period of missing data in 1 eye, then we just cutout the period
+        % with that missing data.
+        if ~realBlink
+            startCutTs = blinkOnsetIs(bci);
+            endCutTs = blinkOffsetIs(bci);
+            %otherwise (including if we just have monocular data), we cut out
+            %the missing data and a buffer period before and after to get rid
+            %of artificats in the gaze positions:
+        else
+            for eye=1:2 %loop thru eyes
+
+                %compute velocity of vertical gaze position
+
+                %yvels = [1; diff(eyeY(thisBlinkTimes,eye),1,1)/msPerSample];
+                yvels = bothYVels(thisBlinkTimes, eye);
+
+                %find when the y-velocity went to zero
+                zeroVelTimes = thisBlinkTimes(abs(yvels)<maxYVelForCut); %sometimes the velocity cross 0 but due to sampling doesnt quite reach 0, so we'll take 0.25 pix per ms as cutoff
+
+                %time when the blink distortions started: latest time before signal
+                %disappears when y velocity was 0
+                zeroTimesBeforeShut = zeroVelTimes - blinkOnsetIs(bci);
+
+                zeroTimesBeforeShut = zeroTimesBeforeShut(zeroTimesBeforeShut<(-minBuffer));
+                if isempty(zeroTimesBeforeShut)
+                    zeroTimesBeforeShut = min(zeroVelTimes - blinkOnsetIs(bci));
+                end
+                %start at the last time the y velocity was 0
+                startCutBuffer = min([-minBuffer max(zeroTimesBeforeShut)]);
+
+
+                if ~isempty(startCutBuffer)
+                    %but don't cut more than beforeBlinkBuffer (take max of 2
+                    %negative numbers)
+                    startCutBuffer = max([startCutBuffer -round(beforeBlinkBuffer/msPerSample)]);
+                    if startCutBuffer>0, keyboard; end
+
+                    startCutT = blinkOnsetIs(bci)+startCutBuffer; %add a negative number
+                    %can't cut out more data than we have:
+                    if startCutT<1, startCutT =1; end
+                else
+                    startCutT = blinkOnsetIs(bci);
+                end
+
+                startCutTs(eye) = startCutT;
+
+                %time when the blink distortions stopped: earliest time after
+                %singal disappears when y velocity was 0
+                zeroTimesAfterShut = zeroVelTimes - blinkOffsetIs(bci);
+                zeroTimesAfterShut = zeroTimesAfterShut(zeroTimesAfterShut>(minBuffer));
+                if isempty(zeroTimesAfterShut)
+                    zeroTimesAfterShut = max(zeroVelTimes - blinkOffsetIs(bci));
+                end
+
+                %take earliest time y-position started moving again
+                endCutBuffer = max([minBuffer min(zeroTimesAfterShut)]); %must be positive
+                if ~isempty(endCutBuffer)
+                    %but don't cut more than afterBlinkBuffer
+                    endCutBuffer = min([endCutBuffer round(afterBlinkBuffer/msPerSample)]);
+
+                    endCutT = blinkOffsetIs(bci)+endCutBuffer;
+                    %can't cut out more data than we have:
+                    if endCutT>size(eyeX,1), endCutT = length(times); end
+                else
+                    endCutT = blinkOffsetIs(bci);
+                end
+                endCutTs(eye) = endCutT;
+
             end
-
-            %take earliest time y-position started moving again
-            endCutBuffer = max([minBuffer min(zeroTimesAfterShut)]); %must be positive
-            if ~isempty(endCutBuffer)
-                endCutT = blinkOffsetIs(bci)+endCutBuffer;
-                %can't cut out more data than we have:
-                if endCutT>size(eyeX,1), endCutT = length(times); end
-            else
-                endCutT = blinkOffsetIs(bci);
-            end
-            endCutTs(eye) = endCutT;
-
         end
 
         %cut out times that are bad for both eyes (earliest cut
@@ -173,7 +223,7 @@ if blinkCount>0
             figure(newfig); clf;
             subplot(2,1,1); hold on;
             plot(thisBlinkTimes, eyeY(thisBlinkTimes, :), 'b-');
-            plot([startCutT endCutT], eyeY([startCutT endCutT], :), 'b.', 'MarkerSize', 8);
+            plot([startCutT endCutT], eyeY([startCutT endCutT], :), 'b.', 'MarkerSize', 12);
             xlim([minT maxT]);
             xlabel('time'); ylabel('y position');
 
@@ -183,11 +233,12 @@ if blinkCount>0
             theseYVels = bothYVels(thisBlinkTimes,:);
 
             plot(thisBlinkTimes, theseYVels, 'r-');
-            plot([startCutT endCutT], theseYVels([find(thisBlinkTimes==startCutT) find(thisBlinkTimes==endCutT)]), 'r.',  'MarkerSize', 8);
+            plot([startCutT endCutT], theseYVels([find(thisBlinkTimes==startCutT) find(thisBlinkTimes==endCutT)]), 'r.',  'MarkerSize', 12);
 
             xlim([minT maxT]);
             xlabel('time'); ylabel('y velocity');
-            pause(.25);
+
+            pause(0.5);
 
         end
 
