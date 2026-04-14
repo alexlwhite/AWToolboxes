@@ -36,11 +36,12 @@ for i = 1:height(sacr)
 end
 
 % Find cluster onsets and offsets
-m = find(diff([0, s, 0])); %Why add zeros to start and end?
+m = find(diff([0, s, 0])); %Why add zero to the  end?
 m = reshape(m, 2, [])';     %reshape m so that onsets are in column 1 and offsets in column 2
-m(:, 2) = m(:, 2) - 1; % Adjust for diff offset
+m(:, 2) = m(:, 2) - 1; % Adjust offset times for diff offset
 numClusters = size(m, 1);
 
+%create an intial table of binocular saccdes 
 tempBinoc = [];
 monolIdx = true(height(sacl), 1);
 monorIdx = true(height(sacr), 1);
@@ -70,9 +71,8 @@ for i = 1:numClusters
 
 
 
-        %this row now has the combined data and the L and R data saved in
-        %it too
-
+        %Add a row to tempBinoc that has the combined data and the L and R
+        %data saved in it
         tempBinoc = [tempBinoc; renameVars(rowR, 'R_'), renameVars(rowL, 'L_')];
 
         % Mark these as 'not monocular'
@@ -87,23 +87,42 @@ monor = sacr(monorIdx, :);
 
 % 3. Final Merge of binocular events based on mergeInt
 if ~isempty(tempBinoc)
+    %start building the "msac" table that has 1 row per saccade after
+    %merging events too close in time
     msac = tempBinoc(1, :);
     curr = 1;
     for i = 2:height(tempBinoc)
         % Check if gap between binocular events is small enough
-        if tempBinoc.R_onsetSample(i) - msac.R_offsetSample(curr) <= mergeInt
-            % Merge: update offsets
+        % test the difference between next saccade onset and current saccade offset
+        if (tempBinoc.R_onsetSample(i) - msac.R_offsetSample(curr)) <= mergeInt
+            % Merge: update offsets. Set current offsets to be next
+            % saccadaes offsets. 
             msac.R_offsetSample(curr) = tempBinoc.R_offsetSample(i);
             msac.L_offsetSample(curr) = tempBinoc.L_offsetSample(i);
             % (Optionally update peak velocity/amplitude here if needed)
         else
             curr = curr + 1;
+            %add this saccade to msacc table
             msac(curr, :) = tempBinoc(i, :);
         end
     end
 
-    % Aveage over eyes, to have 1 set of parameters for each binocular sacacde
-    varsToAvg = {'onsetSample','offsetSample','peakVelocity','startX','startY','endX','endY','dx','dy','amp','totalAmpX','totalAmpY','maxCurveDeviation','curveRatio'};
+    %set binocular saccade onset to earliest of left eye, right eye onsets
+    msac.onsetSample = min([msac.L_onsetSample msac.R_onsetSample], [], 2);
+
+    %set binocular saccade offset to latest of left eye, right eye onsets
+    msac.offsetSample = max([msac.L_offsetSample msac.R_offsetSample], [], 2);
+    
+    %add duration of each sacadde, using merged onset and offset times 
+    msac.duration_Samples = msac.offsetSample-msac.onsetSample+1;
+
+    %by how much did the the right eye lag the left eye in saccdae onset
+    msac.rightEyeDelay = msac.R_onsetSample - msac.L_onsetSample;
+
+    %
+
+    % Average over eyes, to have 1 set of parameters for each binocular sacacde
+    varsToAvg = {'peakVelocity','startX','startY','endX','endY','dx','dy','amp','totalAmpX','totalAmpY','ampTotal','maxCurveDeviation','curveRatio'};
     for vi=length(varsToAvg):(-1):1
         var = varsToAvg{vi};
         eval(sprintf('msac.%s = mean([msac.L_%s msac.R_%s],2);', var, var, var));
@@ -114,10 +133,6 @@ if ~isempty(tempBinoc)
             keyboard
         end
     end
-
-    %add duration of each sacade
-    msac.dur = msac.offsetSample-msac.onsetSample+1;
-    msac = movevars(msac, "dur", 'Before',"peakVelocity");
 
     %add angle of each saccade, based on averaged change in x and
     %y-position
