@@ -225,8 +225,12 @@ if nsac>0
     
     %ampTotal: total amplitude including all deviations during the
     %high-velocity event 
-    saccTable.ampTotal = sqrt(saccTable.totalAmpX.^2 + saccTable.totalAmpX.^2);
+    saccTable.ampTotal = sqrt(saccTable.totalAmpX.^2 + saccTable.totalAmpY.^2);
 
+
+    if any(saccTable.ampTotal < saccTable.amp)
+        keyboard
+    end
     
     %curve ratio: max deviation from straight line, devided by amp
     saccTable.curveRatio = saccTable.maxCurveDeviation./saccTable.amp;
