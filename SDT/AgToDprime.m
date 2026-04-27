@@ -4,6 +4,8 @@ function dprime = AgToDprime(Ag)
 
 dprime = sqrt(2)*norminv(Ag);
 
+%this assumes equal variance of target-present and target-absent evidence
+%distributions! 
 
 %% What's the relationship betwen dprime and area under the ROC curve? 
 % %First let's test out computing area under the curve, Ag, for a range of d'
