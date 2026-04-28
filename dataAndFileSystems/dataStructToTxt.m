@@ -57,7 +57,17 @@ for t=1:nTrials
             eval(sprintf('docell = iscell(dat.%s);',fs{f})); 
             
             if docell
-                eval(sprintf('fprintf(df,''%%3f\t'',dat.%s{t}(s));',fs{f}));
+                try
+                    eval(sprintf('fprintf(df,''%%3f\t'',dat.%s{t}(s));',fs{f}));
+                catch
+                    eval(sprintf('thisdat = dat.%s{t};', fs{f}));
+                    if isempty(thisdat) %If there's nothing in this cell, print an NaN. 
+                        fprintf(df, 'NaN\t');
+                    else
+
+                        keyboard
+                    end
+                end
             else
                 try
                     eval(sprintf('fprintf(df,''%%3f\t'',dat.%s(t));',fs{f}));
