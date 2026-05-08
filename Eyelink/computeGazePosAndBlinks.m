@@ -1,4 +1,5 @@
-%% function [medPos, meanPos, goodTimes, blinkCutTimes, noBlinkIntervals, pDataRemainAfterBlinkCut] = computeBinocGazePosAndBlinks(time1, time2, edf)
+%% function [medPos, meanPos, goodTimes, blinkCutTimes, noBlinkIntervals, pDataRemainAfterBlinkCut, pupilMissingTimes, B] = computeBinocGazePosAndBlinks(time1, time2, edf)
+
 % This function finds blinks in a sequence of gaze positions and computes
 % the median gaze position (excluding periods with blinks). This version can take in either monocular or binocular gaze position data,
 % so it estimates median gaze position for left and right eye.
