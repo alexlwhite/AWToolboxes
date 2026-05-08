@@ -1,6 +1,9 @@
 %% function PC = AgToUnbiasedPC(Ag) 
 % Converts between area under the ROC curve (Ag) to an estimated of unbiased proportion correct, for 2AFC task. 
 % Treats Ag like unbiased p(correct) in a 2AFC task. 
+%This assumes equal-variance Gaussian distributions of evidence on
+%target-abseent and target-present trials. 
+
 function PC = AgToUnbiasedPC(Ag) 
 
 PC = normcdf(sqrt(2)*norminv(Ag)/2);
