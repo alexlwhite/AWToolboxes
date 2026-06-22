@@ -11,9 +11,9 @@ for c = 1:nC
     
     [colI, rowI] = ind2sub([nCols nRows], c);
     
-    text(0, 0, sprintf('row=%i, col=%i', rowI, colI));
+    text(2, 0, sprintf('row=%i, col=%i', rowI, colI));
     
-    xlim([-2 2]); ylim([-2 2]);
+    xlim([-2 5]); ylim([-2 2]);
     axis off;
 end
 
