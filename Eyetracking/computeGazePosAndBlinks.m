@@ -10,6 +10,9 @@
 % - time1: starting time to analyze, in units used by edf.Samples.time
 % - time2: ending time to analyze, also in units used by edf.Samples.time
 % - edf: structure returned by Edf2Mat
+% - countNaNPupilAsBlink: optional, boolean, whether to treat NaNs in the
+% data as blinks, in addition to moments when pupil size = 0. Defaults to
+% false. 
 %
 %
 % Outputs
@@ -34,8 +37,12 @@
 % - B: a table with 1 row per blink, with onset & offset times and cut buffers
 
  
-function [medPos, meanPos, goodTimes, blinkCutTimes, noBlinkIntervals, pDataRemainAfterBlinkCut, pupilMissingTimes, B] = computeGazePosAndBlinks(time1, time2, edf)
+function [medPos, meanPos, goodTimes, blinkCutTimes, noBlinkIntervals, pDataRemainAfterBlinkCut, pupilMissingTimes, B] = computeGazePosAndBlinks(time1, time2, edf, countNaNPupilAsBlink)
 
+if nargin<4
+    %whether to count NaN pupil size as a blink, or just 0.
+    countNaNPupilAsBlink = false;
+end
 doPlot = false;
 
 %some things are hard-coded:
@@ -45,9 +52,6 @@ minBeforeBuffer = 30; %min buffer time in ms to cut out before missing eye data
 minAfterBuffer = 70; %min buffer time in ms to cut out after missing eye data (longer than the before-blink buffer b/c it usually takes longer for the gaze to re-settle.)
 minGapBtwnBlinks = 10; %gaps must be separated by this many ms, otherwise are merged
 filtSD = 10; %SD of Gaussian smoothing kernel that is applied to the velocities, to detect when the gaze distortions start/stop around blinks 
-
-%whether to count NaN pupil size as a blink, or just 0.
-countNaNPupilAsBlink = false;
 
 %maxYVelForCut = 0.25; % cutoff y-velocity in pix/ms to consider as when the eye starts or stops moving due to blink artifact
 
@@ -431,7 +435,12 @@ meanY = mean(eyeY(goodTimes, :), 1);
 meanPos = [meanX' meanY']; %Rows = [left eye; right eye]; Columns = [horizontal, vertical]
 
 if any(isnan(medPos)) | any(isnan(meanPos))
-    keyboard
+    if pDataRemainAfterBlinkCut>0
+        if ~doPlot
+            doPlot=true;
+            newfig = figure(3); clf; newfig2=figure(4);
+        end
+    end
 end
 %% plot
 if doPlot & nBlinks>0
