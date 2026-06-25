@@ -84,7 +84,8 @@
 %   opt.yLab               - String. Y-axis title label.
 %   opt.xTickLabs          - Cell array of strings. Labels for major Level-1 ticks on the X-axis.
 %   opt.ylims              - Vector [min max]. Fixed Y-axis limits (Default: Auto-scaled with 10% padding).
-%   opt.yticks              - Vector. Specific tick values along the Y-axis (Default: Calculated automatically).
+%   opt.yticks             - Vector. Specific tick values along the Y-axis (Default: Calculated automatically).
+%   opt.yTickLabs          - Cell array of strings. Labels for y-axis ticks.  
 %   opt.doYLab             - Boolean. Toggle visibility of the Y-axis label text (Default: true).
 %   opt.doYTickLab         - Boolean. Toggle visibility of numeric Y-axis tick mark text (Default: true).
 %   opt.legendLabs         - cell array for what to label each condition in  dimension 2
@@ -489,8 +490,11 @@ set(gca,'XTick',l1Centers,'YTick',opt.yticks);
 if isfield(opt,'xTickLabs')
     set(gca,'XTickLabel',opt.xTickLabs);
 end
+
 if ~opt.doYTickLab
     set(gca,'YTickLabel',{});
+elseif isfield(opt,'yTickLabs')
+    set(gca,'YTickLabel',opt.yTickLabs);
 end
 if isfield(opt,'xLab')
     xlabel(opt.xLab);
