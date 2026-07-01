@@ -102,7 +102,6 @@ bothYVels(isnan(bothYVelsNoSmoth)) = NaN;
 %compute acceleration:  
 bothYAcc = vecvel(bothYVels, samrat, 2);
 yAccSD = std(bothYAcc,[],1,"omitmissing");
-accCutuff = median(bothYAcc, 1, 'omitnan') + yAccSD;
 accCutuff = median(abs(bothYAcc),'omitmissing') + yAccSD;
 % plott = 1000;
 % figure; 
@@ -291,7 +290,7 @@ if blinkCount>0
                 end
 
 
-                %take earliest time y-acceleration slowed won
+                %take earliest time y-acceleration slowed down
                 endCutBuffer = max([minAfterBuffer min(zeroTimesAfterShut)]); %must be positive
                 if ~isempty(endCutBuffer)
                     %but don't cut more than maxAfterBlinkBuffer
