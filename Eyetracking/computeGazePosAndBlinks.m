@@ -34,10 +34,11 @@
 % - pupilMissingTimes: a Bx2 matrix that defines start and end times of each blink
 % (when pupil size is missing.   These times are absolute values from edf.Samples.time.
 % Note: the edf file aslo has blinksEvents.eBlink!
-% - B: a table with 1 row per blink, with onset & offset times and cut buffers
+% - blinkTable: a table with 1 row per blink, with onset & offset times, in
+%   terms of the timestamps from edf.samples.time.
 
  
-function [medPos, meanPos, goodTimes, blinkCutTimes, noBlinkIntervals, pDataRemainAfterBlinkCut, pupilMissingTimes, B] = computeGazePosAndBlinks(time1, time2, edf, countNaNPupilAsBlink)
+function [medPos, meanPos, goodTimes, blinkCutTimes, noBlinkIntervals, pDataRemainAfterBlinkCut, pupilMissingTimes, blinkTable] = computeGazePosAndBlinks(time1, time2, edf, countNaNPupilAsBlink)
 
 if nargin<4
     %whether to count NaN pupil size as a blink, or just 0.
@@ -158,7 +159,7 @@ if doPlot & blinkCount>0, newfig = figure(3); clf; newfig2=figure(4); clf; end
 %determine which times have "good" eye data, cutting out the blink with some padding
 %on either side:
 
-B = table;
+blinkTable = table;
 
 if blinkCount>0
     for bci=1:blinkCount
@@ -381,7 +382,7 @@ if blinkCount>0
             b.preBlinkBufferCut = blinkOnsetIs(bci) - startCutT;
             b.postBlinkBufferCut = endCutT - blinkOffsetIs(bci);
 
-            B = [B; b];
+            blinkTable = [blinkTable; b];
         end
       
     end
