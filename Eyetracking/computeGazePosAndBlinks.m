@@ -125,34 +125,50 @@ else
         keyboard
     end
 end
+
 %find onset and offset of blinks
 blinkOn = false; blinkCount = 0;
 blinkOnsetIs = []; blinkOffsetIs = [];
+lastOnset = NaN;
 for tt = 1:length(times)
     if isBlink(tt)
         if ~blinkOn
             blinkOnsetIs = [blinkOnsetIs tt];
+            lastOnset = tt;
             blinkCount = blinkCount + 1;
         end
         blinkOn = true;
     else
         if blinkOn
             blinkOffsetIs = [blinkOffsetIs tt];
+            lastOffset = tt;
         end
         blinkOn = false;
     end
 end
 if blinkOn, blinkOffsetIs = [blinkOffsetIs tt]; end
 
+%Merge blinks that are very close together in time 
+if length(blinkOnsetIs)>1
+    interBlinkDurs = blinkOnsetIs(2:end) - blinkOffsetIs(1:(end-1)) + 1;
+    toMerge = interBlinkDurs<minGapBtwnBlinks;
+  
+    if any(toMerge)
+        % KEEP the first onset, and any onset where the preceding gap was NOT merged.
+        blinkOnsetIs  = blinkOnsetIs([true ~toMerge]);
+    
+       % KEEP the offset only if the succeeding gap was NOT merged, plus the final offset.
+        blinkOffsetIs = blinkOffsetIs([~toMerge true]);
+
+    end
+end
+blinkCount = length(blinkOnsetIs);
+
 pupilMissingTimes = [times(blinkOnsetIs) times(blinkOffsetIs)];
-
-
 goodTimes = true(size(times));
 
 uniqueBlinkCount = 0;
 blinkCutTimes = [];
-
-
 
 if doPlot & blinkCount>0, newfig = figure(3); clf; newfig2=figure(4); clf; end
 %determine which times have "good" eye data, cutting out the blink with some padding
@@ -180,24 +196,54 @@ if blinkCount>0
 
 
         if isBinoc
-            %check if both eyes blinked or if this was just missing data in
-            %one eye
+            %check if both eyes blinked or if this was just missing data in one eye
             thesePSz = pupSz(blinkOnsetIs(bci):blinkOffsetIs(bci),:);
             theseBlink = thesePSz==0;
             if countNaNPupilAsBlink
                 theseBlink = theseBlink | isnan(thesePSz);
             end
 
+            %save whether this blink just ocurred in 1 eye
+            b.monocularBlink = ~any(theseBlink(:,1) & theseBlink(:,2));
+
             %realBlink: true if both eyes have pupil size missing at same
             %time. False if only one eye does.
             %If true, then we try to cut out a section around the blink,
             %based on distortions to vertical gaze position.
             %If false, we just cut out the section with missing data.
-            realBlink = any(theseBlink(:,1) & theseBlink(:,2));
+            %realBlink = any(theseBlink(:,1) & theseBlink(:,2));
+            
+           
+            %BUT ACTUALLY NO, SOME PEOPLE DO SEEM TO WINK! So a blink in 1
+            %%eye is a blink 
+            realBlink = true; 
+            if ~realBlink 
+                fprintf(1,'\nBlink %i is not a "real" blink because not in both eyes\n', bci); 
+                figure; 
+                subplot(2,1,1); hold on;
+                for eyei=1:2
+                    pstart = max([1 blinkOnsetIs(bci)-500]);
+                    pend = min([size(pupSz,1) blinkOffsetIs(bci)+500]);
 
-            if ~realBlink, fprintf(1,'\nBlink %i is not a "real" blink because not in both eyes\n', bci); end
+                    hs(eyei)=plot(pupSz(pstart:pend,eyei),'-');
+                end
+                legend(hs, {'left eye','right eye'});
+                ylabel('pupil size');
+                subplot(2,1,2); hold on;
+                for eyei=1:2
+                    pstart = max([1 blinkOnsetIs(bci)-500]);
+                    pend = min([size(eyeY,1) blinkOffsetIs(bci)+500]);
+
+                    hs(eyei)=plot(eyeY(pstart:pend,eyei),'-');
+                end
+                legend(hs, {'left eye','right eye'});
+                ylabel('Vert gaze pos');
+                keyboard
+            end
+
         else
             realBlink = true;
+            b.monocularBlink = NaN;
         end
 
 
@@ -214,7 +260,6 @@ if blinkCount>0
             %of artificats in the gaze positions:
         else
             for eye = eyes %loop thru eyes
-
               
                 %% Set start time of blink-related distortions: 
 
@@ -312,7 +357,6 @@ if blinkCount>0
         startCutT = min(startCutTs);
         endCutT = max(endCutTs);
         
-
         if doPlot
             figure(newfig); clf;
             subplot(3,1,1); hold on;
