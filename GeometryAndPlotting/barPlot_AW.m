@@ -25,6 +25,7 @@
 %    level2Sep
 %    xAxisMargin
 %    xLab
+%    doXLab
 %    xTickLabs
 %    ylims
 %    yLab
@@ -107,6 +108,11 @@ end
 if ~isfield(opt,'doYLab')
     opt.doYLab = true;
 end
+
+if ~isfield(opt,'doXLab')
+    opt.doXLab = true;
+end
+
 
 if ~isfield(opt,'doYTickLab')
     opt.doYTickLab = true;
@@ -220,7 +226,7 @@ end
 if ~opt.doYTickLab
     set(gca,'YTickLabel',{});
 end
-if isfield(opt,'xLab')
+if isfield(opt,'xLab')  && opt.doXLab
     xlabel(opt.xLab);
 end
 if isfield(opt,'yLab') && opt.doYLab
