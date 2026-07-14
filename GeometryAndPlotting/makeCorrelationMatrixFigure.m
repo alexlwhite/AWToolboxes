@@ -1,17 +1,48 @@
-function makeCorrelationMatrixFigure(rhos, pvals, xLabs, yLabs, addColorBar, maxR)
- 
-%% setup colormap
-twoHues = [179 348]/360;
-Ns = [100 101];
-hues = [ones(Ns(1), 1)*twoHues(1); ones(Ns(2),1)*twoHues(2)];
-sats = [linspace(1,1/Ns(1),Ns(1)) linspace(0, 1, Ns(2))]';
-vals = ones(size(sats))*0.7;
-
-myColrs = hsv2rgb([hues sats vals]);
+function makeCorrelationMatrixFigure(rhos, pvals, xLabs, yLabs, addColorBar, maxR, minR, achromatic)
 
 if ~exist('maxR', 'var')
     maxR = max(abs(rhos(:)));
 end
+%if minR not provided, assume its negative maxR
+
+if ~exist('minR', 'var')
+    minR = -maxR;
+end
+
+if ~exist('achromatic','var')
+    achromatic = false;
+end
+
+doTwoHues = minR<0 && maxR>0;
+
+ 
+%% setup colormap
+if doTwoHues
+    twoHues = [179 348]/360;
+    Ns = [100 101];
+    hues = [ones(Ns(1), 1)*twoHues(1); ones(Ns(2),1)*twoHues(2)];
+    sats = [linspace(1,1/Ns(1),Ns(1)) linspace(0, 1, Ns(2))]';
+    vals = ones(size(sats))*0.7;
+
+    myColrs = hsv2rgb([hues sats vals]);
+    achromatic = false;
+
+else
+    Ns = 200;
+
+    if achromatic %grayscale! 
+        hues = ones(Ns, 1);
+        sats = zeros(Ns, 1);
+        vals = linspace(0.8,0.05,Ns)';
+
+    else
+        hues = 348/360*ones(Ns, 1);
+        sats = linspace(0, 1, Ns)';
+        vals = ones(size(sats))*0.7;
+    end
+    myColrs = hsv2rgb([hues sats vals]);
+end
+
 
 % % add a special color for NaN correlations 
 nanColr = [1 1 1];
@@ -23,13 +54,19 @@ if any(emptyCells(:))
     rhos(emptyCells) = nanRho;
     myColrs = [nanColr; myColrs];
 end
-lineColr = [0 0 0];
+
+if ~achromatic
+    lineColr = [0 0 0];
+else
+    lineColr = [1 1 1];
+end
+
 
 
 
 %% make figure -- oddly typing "hold on" before the imagesc command flips the dimensions! 
 
-imagesc(rhos,[-maxR maxR]);
+imagesc(rhos,[minR maxR]);
 colormap(myColrs);
 if addColorBar, colorbar; end
 
