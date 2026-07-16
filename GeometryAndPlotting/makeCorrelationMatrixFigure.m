@@ -26,6 +26,7 @@ if doTwoHues
 
     myColrs = hsv2rgb([hues sats vals]);
     achromatic = false;
+    textColor = [1 1 1];
 
 else
     Ns = 200;
@@ -35,10 +36,12 @@ else
         sats = zeros(Ns, 1);
         vals = linspace(0.8,0.05,Ns)';
 
+        textColor = [1 1 1];
     else
         hues = 348/360*ones(Ns, 1);
         sats = linspace(0, 1, Ns)';
         vals = ones(size(sats))*0.7;
+        textColor = [1 1 1];
     end
     myColrs = hsv2rgb([hues sats vals]);
 end
@@ -88,7 +91,7 @@ for xi = 1:nX
             else
                 sigTxt = '';
             end
-            text(xi,yi,sprintf('%.2f%s',rhos(yi,xi),sigTxt),'Color',[1 1 1],'HorizontalAlignment','Center','VerticalAlignment','Middle');
+            text(xi,yi,sprintf('%.2f%s',rhos(yi,xi),sigTxt),'Color',textColor,'HorizontalAlignment','Center','VerticalAlignment','Middle');
         end
         %plot horiz dividing line
         plot([0.5 nX+0.5], [yi yi]+0.5, '-', 'Color', lineColr);
@@ -108,4 +111,3 @@ set(gca, 'YTick', 1:nX); % center y-axis ticks on bins
 set(gca, 'XTickLabel', xLabs,'XAxisLocation','Top'); % set x-axis labels
 %xtickangle(45);
 set(gca, 'YTickLabel', yLabs); % set y-axis labels
-
