@@ -32,6 +32,7 @@ function saccTable = detectSaccades(postns,vel,velThresh,minDur,mergeInterval)
 %    - dy, vertical difference in start and end points
 %    - totalAmpX, maximum horizontal difference in gaze positions during the whole high-velocity event
 %    - totalAmpY, maximum vertical difference during the whole event
+%    - ampTotal: the greatest distance between all gaze positions during the movement; sqrt(totalAmpX.^2 + totalAmpY.^2);
 %    - amp: amplitude of saccade, distance from starting to ending point 
 %    - curveRatio: max deviation from straight line, divided by amp
 
