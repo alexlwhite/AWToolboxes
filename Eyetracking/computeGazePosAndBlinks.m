@@ -183,10 +183,10 @@ if blinkCount>0
         b.blinkNum = bci;
         
         %Define blink time with some buffer before and after:
-        minT = floor(blinkOnsetIs(bci)-maxBeforeBlinkBuffer/msPerSample);
+        minT = floor(blinkOnsetIs(bci)-maxBeforeBlinkBuffer);
         minT(minT<1) = 1;
 
-        maxT = ceil((blinkOffsetIs(bci)+maxAfterBlinkBuffer/msPerSample));
+        maxT = ceil((blinkOffsetIs(bci)+maxAfterBlinkBuffer));
         maxT(maxT>length(times)) = length(times);
 
         thisBlinkTimes = minT:maxT;
