@@ -44,7 +44,7 @@ if nargin<3
 end
 
 if propPresent<0 || propPresent>1
-    error('Prop present must be betwee 0 and 1\n');
+    error('Prop present must be between 0 and 1\n');
 end
 
 pcs = propPresent*hr + (1-propPresent)*(1-fr);

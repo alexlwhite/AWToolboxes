@@ -1,16 +1,18 @@
 function M = angleMetric(A,B)
 
-
-if A<0 && B<0 %switch sign and switch A and B
+%If both A and B are negative, switch A to B and change the sign of both
+bothNeg = A<0 & B<0;
+if any(bothNeg)
     B0 = B;
-    B = -1*A;
-    A = -B0;
+    B(bothNeg) = -1*A(bothNeg);
+    A(bothNeg) = -B0(bothNeg);
 end
 
-
+%compute the angle
 M = atand(A./B);
+
 %apply a correction so that >45 is positive, <45 is
-%negatiion, all the way round the circle
+%negative, all the way round the circle
 M(B>=0) = M(B>=0)-45;
-M(B<0) = M(B<0)+135;
+M(B<0)  = M(B<0)+135;
 
