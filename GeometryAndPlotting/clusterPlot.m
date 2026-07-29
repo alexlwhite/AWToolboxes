@@ -44,7 +44,7 @@
 %   opt.level1Sep          - Scalar. X-axis separation between major group clusters (Default: 0.6).
 %   opt.level2Sep          - Scalar. X-axis separation between adjacent sub-conditions (Default: 0.25).
 %   opt.xAxisMargin        - Scalar. Empty margin left on the far-left and far-right of the plot (Default: 0.3).
-
+%
 % JITTER AND DISPERSION CONTROLS:
 %   opt.jitterSpread       - Scalar. Proportion of opt.barWidth used to define the maximum horizontal boundaries 
 %                            for points (Default: 0.33, meaning boundaries span from -0.33 to +0.33 * barWidth). 
@@ -57,7 +57,7 @@
 %   opt.nVertBands         - Integer. Number of vertical sorting histogram slots used in fallback jittering (Default: 50).
 %                            Used only the simpler histogram-based horizontal jitter is needed (because
 %                            conditions differ in N, or useHistogramJitter is requested). 
-
+%
 % CONDITION MEAN FORMATTING:
 %   opt.meanSymbol         - Character. Symbol for group mean (Default: 'd' for diamond; use '-' for a horizontal line).
 %   opt.meanLineThick      - Scalar. Line thickness used ONLY when meanSymbol = '-' (Default: 4).
@@ -90,6 +90,7 @@
 %   opt.doYTickLab         - Boolean. Toggle visibility of numeric Y-axis tick mark text (Default: true).
 %   opt.legendLabs         - cell array for what to label each condition in  dimension 2
 %   opt.doLegend           - Boolean. Toggle generation of a plot legend (Default: true).
+%   opt.legendToIndivs     - Boolean. If true, the legend tracks the individual participant dots. If false, it tracks the mean symbols.   (Default: true). 
 %   opt.legendLoc          - String. MATLAB position anchor string for the legend (Default: 'NorthWest').
 %   opt.legendTitle        - String. Title header text placed inside the legend box (Default: '').
 %   opt.lev1ForLegend      - Integer. Level-1 group row index used to pull handles for legend display (Default: last row).
@@ -198,6 +199,9 @@ if ~isfield(opt,'doYTickLab')
 end
 if ~isfield(opt,'doLegend')
     opt.doLegend = true;
+end
+if ~isfield(opt, 'legendToIndivs')
+    opt.legendToIndivs = true;
 end
 if ~isfield(opt,'legendLoc')
     opt.legendLoc = 'NorthWest';
@@ -387,9 +391,8 @@ else
     end
 end
 
-%% Plot execution 
+%% Plot  
 hold on;
-handles = zeros(n1,n2);
 
 % Draw baseline horizontal line at 0 if the tracking range spans negative to positive
 if prod(opt.ylims)<0
@@ -423,26 +426,33 @@ if opt.connectLev1IndivPts && allCellsSameSize
     end
 end
 
+handles = zeros(n1,n2);
+
 for i1 = 1:n1
     for i2 = 1:n2
         % Plot individual data points (Dots)
         hdot = plot(allX{i1, i2}, ds{i1, i2}, opt.symbols{i1,i2}, 'MarkerEdgeColor', squeeze(opt.edgeColors(i1,i2,:))', 'MarkerFaceColor', squeeze(opt.fillColors(i1,i2,:))', 'MarkerSize', opt.markSz, 'LineWidth', opt.markEdgeLineWidth);
-        
+
         if isfield(opt, 'dotFaceAlpha')
             hdot.MarkerFaceAlpha = opt.dotFaceAlpha;
-        end
-        
-        handles(i1,i2) = hdot;
+        end        
         
         % Plot means
         if strcmp(opt.meanSymbol, '-')
             % Plot condition central tendency mean as a flat horizontal line width bar
             bx = barCenters(i1,i2)+[-0.5 0.5]*opt.barWidth;
             by = ones(1,2)*nanmean(ds{i1, i2});
-            plot(bx, by, '-', 'Color', squeeze(opt.meanColors(i1,i2,:)), 'LineWidth',opt.meanLineThick);
+            hMean = plot(bx, by, '-', 'Color', squeeze(opt.meanColors(i1,i2,:)), 'LineWidth',opt.meanLineThick);
         else
             % Plot condition central tendency mean as an independent point symbol
-            plot(barCenters(i1,i2), nanmean(ds{i1, i2}), opt.meanSymbol, 'Color', squeeze(opt.meanColors(i1,i2,:)), 'MarkerSize',opt.meanDotSize);
+            hMean = plot(barCenters(i1,i2), nanmean(ds{i1, i2}), opt.meanSymbol, 'Color', squeeze(opt.meanColors(i1,i2,:)), 'MarkerSize',opt.meanDotSize);
+        end
+
+        if opt.legendToIndivs
+            %set legend handles based on individual subject dots 
+            handles(i1,i2) = hdot;
+        else
+            handles(i1,i2) = hMean;
         end
         
         % Plot error bars
