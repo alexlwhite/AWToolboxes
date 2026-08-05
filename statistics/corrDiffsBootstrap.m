@@ -41,3 +41,14 @@ else
     bootP = mean(cdiffs < 0); % Calculate the p-value based on the bootstrap distribution
 end
 disp(['Bootstrap p-value: ', num2str(bootP)]);
+
+%% Gemini's justification for using bootstrapping and resampling data points with replacement
+%% which means multiple copies of the same data points go into correlations: 
+
+% Here is why drawing duplicate participants does not distort your correlation:
+% 	You sample whole participants (rows), preserving structure: On each iteration, you draw an entire participant's set of scores [A_i,B_i,C_i,D_i ] together. Because the paired measurements within each participant are never broken apart, the internal covariance structure among conditions remains completely intact.
+% 	Duplication alone does not change a correlation: Correlation measures relative bivariate alignment, not sample size. If you took a dataset of 20 people and cloned every single person 5 times to make 100 people, Pearson's r would remain identical.
+% 	Variation creates the sampling distribution: Because a bootstrap sample randomly duplicates some participants and omits others, each resampled dataset gets a slightly different mix of high and low scatter. Calculating Δr=r_AB-r_CD on each of these 5,000 resampled datasets builds an empirical distribution that models the true sampling variability of your effect.
+% 	The sample acts as the population: Bootstrapping treats your N participants as a mini-universe representing the broader population. Drawing N rows with replacement simulates what would happen if you ran your experiment 5,000 separate times with new random draws of N observers from that population.
+% The method would only fail if you resampled cells independently (e.g., drawing a value for Condition A from Participant 3 and Condition B from Participant 8), which would destroy the within-subject design. As long as you resample entire participant rows intact, bootstrapping yields an unbiased test for comparing dependent correlations.
+% 
