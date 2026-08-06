@@ -76,8 +76,7 @@ weights = weights/sum(weights);
 
 %N: count how many non-nan measurements there are 
 N = sum(~isnan(ds),dim);
-try
-    SEM = sqrt(var(ds,weights,dim,'omitnan'))./sqrt(N);
-catch
-    keyboard
-end
+
+%the Standard Error of the Mean (SEM): 
+% The standard deviation (the square root of variance), divided by the square root of N. 
+SEM = sqrt(var(ds,weights,dim,'omitnan'))./sqrt(N);
