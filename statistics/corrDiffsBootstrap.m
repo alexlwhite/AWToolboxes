@@ -36,9 +36,9 @@ meanCorrDiff = mean(cdiffs);
 %figure; histogram(cdiffs, 100);
 
 if meanCorrDiff<0
-    bootP = mean(cdiffs > 0); % Calculate the p-value based on the bootstrap distribution
+    bootP = 2*mean(cdiffs > 0); % Calculate the p-value based on the bootstrap distribution
 else
-    bootP = mean(cdiffs < 0); % Calculate the p-value based on the bootstrap distribution
+    bootP = 2*mean(cdiffs < 0); % Calculate the p-value based on the bootstrap distribution
 end
 disp(['Bootstrap p-value: ', num2str(bootP)]);
 
