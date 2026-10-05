@@ -14,7 +14,7 @@
 %   nReps               number of sample-with-replacement iterations
 %                       (default 2000)
 %  
-%   CIrange             confidence interval range (default 68.27)
+%   CIrange             confidence interval range (default 95)
 %
 %   BCFlag              boolean flag for whether or not to do the
 %                       bias-correction (default 1)
@@ -40,7 +40,8 @@ if ~exist('BCFlag','var')
 end
 
 if ~exist('CIrange','var')
-    CIrange = 68.27;  %corresponds to +/- 1 s.d. for a normal distribution
+    %CIrange = 68.27;  %corresponds to +/- 1 s.d. for a normal distribution
+    CIrange = 95; 
 end
 
 if ~exist('nReps','var')
