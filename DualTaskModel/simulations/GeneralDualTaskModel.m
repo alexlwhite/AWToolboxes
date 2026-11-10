@@ -172,8 +172,8 @@ evidenceMeanIgnored = mean([attndStim1Mean targAbstMean;
 %evidenceMeanIgnored = [targAbstMean targAbstMean]; 
                      
 
-presMs = [attndStim1Mean evidenceMeanIgnored(1); ...  %single-task side 1
-          evidenceMeanIgnored(2) attndStim2Mean; ... %single-task side 2
+presMs = [attndStim1Mean evidenceMeanIgnored(2); ...  %single-task side 1
+          evidenceMeanIgnored(1) attndStim2Mean; ... %single-task side 2
           attndStim1Mean attndStim2Mean];       %dual-task
 
 %Standard deviations: 
@@ -214,8 +214,8 @@ end
 
 %target-absent means are only set to the 'correct' value of targAbstMean
 %when that side is attended. Otherwise they're set to evidenceMeanIgnored. 
-abstMs = [targAbstMean evidenceMeanIgnored(1); 
-         evidenceMeanIgnored(2) targAbstMean; 
+abstMs = [targAbstMean evidenceMeanIgnored(2); 
+         evidenceMeanIgnored(1) targAbstMean; 
          targAbstMean  targAbstMean]; 
      
  

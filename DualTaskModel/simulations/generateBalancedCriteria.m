@@ -7,8 +7,10 @@
 % Inputs: 
 % - Ms: set of means of Guassian distributions from which sensory evidence
 % will be drawn in different conditions (we assume that all those
-% conditions are equally likely)
-% - SDs: SDs of those distributions 
+% conditions are equally likely). Can be a vector or matrix. 
+% - SDs: SDs of those distributions. If SDs has the same number of elements
+%   as Ms, then they are paired element-by-element (Ms(i) goes with SDs(i)).
+%   Otherwise, every mean is combined with every SD. 
 % - nRespLevs: the number of response alternatives the simulated observer
 % has (e.g., 4 confidence ratings). 
 % 
@@ -22,9 +24,18 @@
 function Cs = generateBalancedCriteria(Ms,SDs,nRespLevs)
 
 simRs = [];
-for mi=1:length(Ms)
-    for si=1:length(SDs)
-        simRs = [simRs randn(1,10000)*SDs(si)+Ms(mi)];
+if numel(Ms)==numel(SDs)
+    %means and SDs are paired element-by-element (use (:) so that ALL elements
+    %of matrix inputs are included, e.g. both target-present and target-absent columns)
+    for mi=1:numel(Ms)
+        simRs = [simRs randn(1,10000)*SDs(mi)+Ms(mi)];
+    end
+else
+    %otherwise, combine every mean with every SD
+    for mi=1:numel(Ms)
+        for si=1:numel(SDs)
+            simRs = [simRs randn(1,10000)*SDs(si)+Ms(mi)];
+        end
     end
 end
 
