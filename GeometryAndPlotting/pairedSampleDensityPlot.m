@@ -59,9 +59,16 @@ for jj = 1:2
     %set xvals as deviations, positive or negative, from midline 
     xvals = opt.midlineX + plotSigns(jj)*dens;
 
+    %anchor both ends of the curve on the midline, so the shape closes at
+    %the top and bottom (ksdensity's density is small but not 0 at its ends)
+    xvals = [opt.midlineX, xvals, opt.midlineX];
+    yvals = [yvals(1), yvals, yvals(end)];
+
     %option for just an outline with no fill: NaNs in fillColors
     if all(isnan(opt.fillColors(jj, :)))
-        legendHs(jj) = plot(xvals, yvals, '-', 'Color', opt.edgeColors(jj,:),'LineWidth',opt.fillLineWidth);
+        %close the outline by returning to the first point, which draws the
+        %edge along the midline (just like fill does in the filled version)
+        legendHs(jj) = plot([xvals xvals(1)], [yvals yvals(1)], '-', 'Color', opt.edgeColors(jj,:),'LineWidth',opt.fillLineWidth);
     else %filled distribution
 
         legendHs(jj) = fill(xvals,yvals,opt.fillColors(jj,:),'EdgeColor',opt.edgeColors(jj,:),'LineWidth',opt.fillLineWidth);
@@ -82,16 +89,16 @@ for jj = 1:2
         plot([opt.midlineX meanX], [meanY meanY], '-','Color',opt.meanColors(jj,:), 'LineWidth',opt.meanLineWidth);
     end
     
-    maxXs(jj) = max(abs(xvals));
+    maxXs(jj) = max(dens); %maximum deviation from the midline
     
     if opt.addCI
         CI = boyntonBootstrap(@mean, data{jj}, 2000, 95, true);
-        plot([0.5 0.5]*meanX, CI, '-','Color',opt.meanColors(jj,:), 'LineWidth',opt.meanLineWidth);
+        plot([1 1]*(opt.midlineX + 0.5*(meanX-opt.midlineX)), CI, '-','Color',opt.meanColors(jj,:), 'LineWidth',opt.meanLineWidth);
     end
 
 end
 
-maxDev = max(maxXs) - opt.midlineX;
+maxDev = max(maxXs);
 xlims = opt.midlineX + [-1 1]*1.1*maxDev;
 xlim(xlims);
 
@@ -110,7 +117,7 @@ if opt.labelXVals
     for xti=1:length(xtickvals)
         if (xtickvals(xti)-round(xtickvals(xti))) == 0
             xTickLabs{xti} = sprintf('%i',abs(xtickvals(xti)));
-        elseif abs*(xtickvals(xti))<1
+        elseif abs(xtickvals(xti))<1
             xTickLabs{xti} = sprintf('%.2f',abs(xtickvals(xti)));
         else
             xTickLabs{xti} = sprintf('%.1f',abs(xtickvals(xti)));
