@@ -14,7 +14,7 @@
 %   to true. 
 % - CIRange: a single number that specifies therange of the confidence
 % interval. Defaults to 95. 
-% - nReps: number of bootstrap repetitions. Defults to 1000. 
+% - nReps: number of bootstrap repetitions. Defaults to 5000. 
 % - compVal: value against which the mean of diffs is compared. Defaults
 %   to 0. 
 % - weights: a vector of weights for use computing weighted SD, SEM and mean in the
@@ -79,7 +79,13 @@ end
 %% print
 if statsF>0
     % report the sample mean and SD
-    sampleSD = sqrt(var(diffs, weights));
+    % (var with a weight vector normalizes by N, not N-1, so correct for that)
+    if doWeighted
+        wn = weights/sum(weights);
+        sampleSD = sqrt(var(diffs, wn)/(1-sum(wn.^2)));
+    else
+        sampleSD = std(diffs);
+    end
     
     fprintf(statsF, 'Mean of %i samples difference from %.1f = %.3f, SD = %.3f, SEM = %.3f\n', length(diffs), compVal, sampleMean, sampleSD, sampleSEM);
     
