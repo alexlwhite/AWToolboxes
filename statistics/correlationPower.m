@@ -52,7 +52,12 @@ for ni = 1:nN
         % https://www.r-bloggers.com/simulating-from-the-bivariate-normal-distribution-in-r/
         % Proof: http://athenasc.com/Bivariate-Normal.pdf
         x = normrnd(mu_x, sd_x);
-        y = normrnd(mu_y + (sd_y ./ sd_x) .* rho .* (x - mu_x), sqrt(1 - rho^2) .* sd_y.^2);
+          %old version: 
+       %y = normrnd(mu_y + (sd_y ./ sd_x) .* rho .* (x - mu_x), sqrt(1 - rho^2) .* sd_y.^2);
+
+       %Claude's correction: 
+        y = normrnd(mu_y + (sd_y ./ sd_x) .* rho .* (x - mu_x), sqrt(1 - rho^2) .* sd_y); %conditional SD of y given x is sd_y*sqrt(1-rho^2)
+
         [~, pval] = corr(x', y');
 
         % Update power count
