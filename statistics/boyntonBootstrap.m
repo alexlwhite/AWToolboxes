@@ -57,8 +57,9 @@ if ~doWeighted
 else
     try
         sampleStat = myStatistic(x, weights);
-    catch
-        keyboard
+    catch err
+        fprintf(2, '(boyntonBootstrap) myStatistic failed when called with weights\n');
+        rethrow(err);
     end
         
 end
