@@ -23,8 +23,14 @@
 
 function fs = getMultNGramsFreq(ngrams, startYear, endYear, corpus, smoothing, caseInsenstive)
 
-%deal with spaces in the input ngram:
-spacer = '%20';
+%case-insensitivity flag: accept either a logical or the strings 'true'/'false'
+if ischar(caseInsenstive) || isstring(caseInsenstive)
+    caseFlag = strcmpi(caseInsenstive, 'true');
+else
+    caseFlag = logical(caseInsenstive);
+end
+if caseFlag, caseStr = 'true'; else, caseStr = 'false'; end
+
 webOpts = weboptions('Timeout',25);
 
 if ~iscell(ngrams)
@@ -36,26 +42,21 @@ ngrams_sp = ngrams; %corrected with spacer inserted
 query = '';
 for ni=1:length(ngrams)
     if ni>1, query = [query ',']; end
-    ngram = ngrams{ni};
-    ispace = find(ngram==' ');
-    if length(ispace)==1
-        ngram = [ngram(1:(ispace-1)) spacer ngram((ispace+1):end)];
-        ngrams_sp{ni} = ngram;
-    elseif length(ispace)>1
-        keyboard
-    end
+    %deal with spaces in the input ngram (URL-encode them):
+    ngram = strrep(ngrams{ni}, ' ', '%20');
+    ngrams_sp{ni} = ngram;
 
     query = [query ngram];
 end
 
 
-url = sprintf('https://books.google.com/ngrams/json?content=%s&year_start=%i&year_end=%i&corpus=%s=smoothing=%i&case_insensitive=%s', query, startYear, endYear, corpus, smoothing, caseInsenstive);
+url = sprintf('https://books.google.com/ngrams/json?content=%s&year_start=%i&year_end=%i&corpus=%s&smoothing=%i&case_insensitive=%s', query, startYear, endYear, corpus, smoothing, caseStr);
 data = webread(url, webOpts);
 
 fs = zeros(size(ngrams));
 
 if isempty(data) %empty data means nothing found?
-    fs = NaN;
+    fs = NaN(size(ngrams));
 else
     if iscell(data)
         names = cell(size(data));
@@ -68,7 +69,7 @@ else
 
 
         for gi=1:length(ngrams)
-            if caseInsenstive %find the sum of all possible versions with different letter cases
+            if caseFlag %find the sum of all possible versions with different letter cases
                 thisOne = find(strcmp(names, [ngrams{gi} ' (All)']) & strcmp(types, 'CASE_INSENSITIVE'));
             else
                 thisOne =  find(strcmp(names, ngrams{gi}));

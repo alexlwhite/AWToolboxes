@@ -19,23 +19,24 @@
 % By Alex White, at Barnard College, 2025
 function f = getNGramFreq(ngram, startYear, endYear, corpus, smoothing, caseInsenstive)
 
-%deal with spaces in the input ngram:
-spacer = '%20';
-
-ispace = find(ngram==' ');
-if length(ispace)==1
-    ngram = [ngram(1:(ispace-1)) spacer ngram((ispace+1):end)];
-elseif length(ispace)>1
-    keyboard
+%case-insensitivity flag: accept either a logical or the strings 'true'/'false'
+if ischar(caseInsenstive) || isstring(caseInsenstive)
+    caseFlag = strcmpi(caseInsenstive, 'true');
+else
+    caseFlag = logical(caseInsenstive);
 end
+if caseFlag, caseStr = 'true'; else, caseStr = 'false'; end
 
-url = sprintf('https://books.google.com/ngrams/json?content=%s&year_start=%i&year_end=%i&corpus=%s=smoothing=%i&case_insensitive=%s', ngram, startYear, endYear, corpus, smoothing, caseInsenstive);
+%deal with spaces in the input ngram (URL-encode them):
+ngram = strrep(ngram, ' ', '%20');
+
+url = sprintf('https://books.google.com/ngrams/json?content=%s&year_start=%i&year_end=%i&corpus=%s&smoothing=%i&case_insensitive=%s', ngram, startYear, endYear, corpus, smoothing, caseStr);
 data = webread(url);
 
 if isempty(data) %empty data means nothing found? 
     f = NaN;
 else
-    if caseInsenstive & iscell(data)
+    if caseFlag && iscell(data)
     if strcmp(data{1}.type,'CASE_INSENSITIVE')
         data = data{1};
     else
