@@ -26,11 +26,11 @@ SSc = SSs(2);
 kr = Ks(1); 
 kc = Ks(2); 
 
-if kr>kc
-    error('(nestedF) Number of parameters for restrited model is bigger than for complete model!')
+if kr>=kc
+    error('(nestedF) Number of parameters for restricted model must be smaller than for complete model!')
 end
 
 Fval = ((SSr-SSc)/(kc-kr))/(SSc/(N-kc));
 df1 = kc-kr; 
 df2 = N-kc;
-Pval = 1-fcdf(Fval,df1,df2);
+Pval = fcdf(Fval,df1,df2,'upper'); %upper tail; more precise than 1-fcdf for small p

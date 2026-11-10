@@ -1,4 +1,4 @@
-function [RMAOV33] = RMAOV33Save2(X,alpha,sfile)
+function [RMAOV33] = RMAOV33Save(X,alpha,sfile)
 % RMAOV33 Three-way Analysis of Variance With Repeated Measures on Three Factors Test.
 %   This is a three-factor analysis of variance design in which all factors are within-
 %   subjects variables. In repeated measures designs, the same participants are used

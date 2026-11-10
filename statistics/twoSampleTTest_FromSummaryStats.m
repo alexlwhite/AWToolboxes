@@ -30,6 +30,10 @@ function [mdiff, tval, pval] = twoSampleTTest_FromSummaryStats(means, SEs, nTria
 
 nV = size(means,1);
 
+%make sure contrastWeights is a column vector (Cx1), for the matrix multiplication below
+contrastWeights = contrastWeights(:);
+nTrials = nTrials(:)';
+
 %pull out standard errors for each condition
 posConds = find(contrastWeights>0);
 negConds = find(contrastWeights<0);
@@ -37,7 +41,6 @@ negConds = find(contrastWeights<0);
 wPos = sum(contrastWeights(posConds));
 wNeg = sum(contrastWeights(negConds));
 if abs(wPos-1)>10^-10 || abs(wNeg+1)>10^-10
-    keyboard
     error('contrastWeights not set properly. The positive weights should sum to 1, as should the negative weights');
 end
 

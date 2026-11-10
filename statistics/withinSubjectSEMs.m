@@ -22,8 +22,9 @@ ncond = size(ds,2); %number of conditions
 globalMeans = mean(ds,2); 
 dsNorm = ds - repmat(globalMeans,[1 ncond]); 
 
-%scale factor to correct SEMs
-scaleF = (ncond/(ncond-1));
+%scale factor to correct SEMs. Morey (2008) multiplies the variance by
+%M/(M-1), so the SEM is multiplied by the square root of that.
+scaleF = sqrt(ncond/(ncond-1));
 
 %SEMs
 sems = scaleF*std(dsNorm,0,1)/sqrt(nsubj);

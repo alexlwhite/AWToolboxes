@@ -78,7 +78,7 @@
 function r = fitPsychometric(intensity, responseCorrect, opt)
 
 %% Set default options
-if nargin<3 && ~exist(opt,'var')
+if nargin<3 || isempty(opt)
     opt = struct;
 end
 

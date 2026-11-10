@@ -1,10 +1,10 @@
 function y = weightedMean(x,w,dim)
 %weightedMean   Weighted Average or mean value.
 %   For vectors, weightedMean(X,W) is the weighted mean value of the elements in X
-%   using non-negative weights W. For matrices, weightedMean(X,W) is a row vector
-%   containing the weighted mean value of each column.  For N-D arrays,
-%   weightedMean(X,W) is the weighted mean value of the elements along the first
-%   non-singleton dimension of X.
+%   using non-negative weights W. For matrices and N-D arrays, 
+%   weightedMean(X,W) is the weighted mean value of the elements along the 
+%   LAST non-singleton dimension of X (e.g., for a conditions x subjects 
+%   matrix, it averages over subjects). Use the DIM input to choose otherwise.
 %
 %   Each element of X requires a corresponding weight, and hence the size
 %   of W must match that of X.
@@ -51,7 +51,6 @@ if(~isequal(size(x), size(w)))
         w = repmat(wr, repDims);
         %fprintf(1,'\n(%s) Reshaping weight vector w to be a matrix of same size as x\n',mfilename);
     else
-        keyboard
         error('Inputs x and w must be the same size.');
     end
 end
