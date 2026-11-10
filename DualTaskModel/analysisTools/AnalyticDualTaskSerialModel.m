@@ -202,15 +202,16 @@ if doPlot
     %coordinates of left single task accuracy:
     x0 = chanceLevel; y0=singleY;
     betaAllOrNone = y0 - slope*chanceLevel;
-    xs = [.5 singleX];
+    xs = [chanceLevel singleX];
     ys = slope*xs+betaAllOrNone;
     plot(xs,ys,'k-');
     
     %plot the best-fitting serial model line (fit with pProcessOnlyOne, still free
     %parameter of pAttendTask1)
-    dual2Ignored = (singleY-intercept)/slope;
+    %(intercept is in chance-subtracted coordinates, so subtract chance from singleY and singleX here)
+    dual2Ignored = ((singleY-chanceLevel)-intercept)/slope;
 
-    xs = [dual2Ignored singleX];
+    xs = [dual2Ignored singleX-chanceLevel];
     ys = slope*xs+intercept;
     plot(xs+chanceLevel,ys+chanceLevel,'r-');
     
