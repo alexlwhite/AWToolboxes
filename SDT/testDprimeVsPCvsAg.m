@@ -35,8 +35,8 @@ for di = 1:length(ds)
     %the compute area under the curve by summing up area of the trapezoids:
     Ags(di) = computeAROC(hrs,frs);
     %proportion correct with neutral criterion
-    neutralHR = 1-normcdf(ds(di)/2, ds(di), targAbstSD); %hit ratewhen c is midway between 0 and d'
-    neutralCR = normcdf(ds(di)/2, 0, targPrestSD); %correct reject rate 
+    neutralHR = 1-normcdf(ds(di)/2, ds(di), targPrestSD); %hit ratewhen c is midway between 0 and d'
+    neutralCR = normcdf(ds(di)/2, 0, targAbstSD); %correct reject rate 
     PCs(di) = mean([neutralHR neutralCR]); %proportion correct is mean of HR and CR
 end
 colormap("hot");
