@@ -39,6 +39,7 @@ try
 catch
     keyboard
 end
+fclose(fid1); fclose(fid2);
 
 %element that is naming convention...seems to have switched across BV
 %versions?

@@ -86,7 +86,7 @@ fprintf(fidNew,'\nNrOfVOIVTCs: 0');
     
 %% Clear BVQX objects
 voi1.ClearObject;
-if exist('clearbvxqobjects')
+if exist('clearbvqxobjects')
     clearbvqxobjects({voi1});
 end
 

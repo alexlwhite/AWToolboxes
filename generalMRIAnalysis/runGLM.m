@@ -21,18 +21,22 @@
 %   the GLM as regressors. Input an empty matrix here if no motion nuissance regressors needed.
 % - motionParamNames: a 1XP cell array of names of motion parameters
 % - censorTRs_HighFD: boolean, whether to "censor" TRs with FD over 0.9,
-%   following Siegel et al, HBM 2014
+%   following Siegel et al, HBM 2014. Censoring is done by adding one
+%   "spike" regressor per censored TR (a column of 0s with a 1 at that TR),
+%   which is equivalent to removing those TRs from the fit. Note that this
+%   means the number of columns in betas depends on how many TRs are censored
+%   (the extra columns are at the end, after the motion parameters).
 % - avgVoxPSCBeforeGLM: a Boolean variable determing whether to average
 %   percent signal change over voxels bere running GLM. Set to false if you
 %   want beta weights for individual voxels in the output, true if you're
 %   going to average over voxels anyway. "bad" voxels with all 0 data are
 %   excluded from this mean. 
-% - doPlot: a variable determining whether to plot the design
-%   matrix, predictors, and best-fitting voxel timecourse, each in a new
-%   figure window. doPlot can be true or false, and it serves as an integer > 0
-%   to specify the beta weight used to pick the "best-fitting" voxel. So if
-%   doPlot = 2, the function will plot the response of an example voxel that has the highest 
-%   beta for regression number 2. 
+% - doPlot: whether to plot data and model predictions in a new figure window. 
+%   If doPlot = 0 (or false), no plot. 
+%   If doPlot = 1 (or true), plot the mean response across voxels and the mean prediction. 
+%   If doPlot is a negative integer -k, plot the response of the example voxel 
+%   that has the largest (absolute) beta for regressor number k. So if 
+%   doPlot = -2, the function will plot the voxel with the highest beta for regressor 2. 
 % - voiName: name of the VOI file used to extract current data. Just used
 %   to add a title to a plot, if doPlot. 
 % 
@@ -55,6 +59,8 @@ function [betas, rSqrs, conds, regressors, badVox] = runGLM(data, PRT, conds, hr
 
 %Make sure that we only use conds that are actually in the PRT. Otherwise
 %some design matrix columns will be all 0s, which makes no sense. 
+%make sure eventSequence is a row vector (code below assumes that), so either orientation can be input
+PRT.eventSequence = PRT.eventSequence(:)';
 usedConds = unique(PRT.eventSequence); 
 conds = intersect(conds, usedConds); 
 
@@ -175,9 +181,15 @@ if censorTRs_HighFD && ~isempty(motionParams)
    
    fdCol = find(strcmp(motionParamNames,'FD')); 
    if ~isempty(fdCol)
-      badTRs = motionParams(:,fdCol)>FDThresh;
-      XX = [XX, badTRs];
-      regressors = cat(2,regressors,{'FDoverThresh'});
+      badTRs = find(motionParams(:,fdCol)>FDThresh);
+      %one "spike" regressor per censored TR, which is equivalent to
+      %removing those TRs from the fit (Siegel et al., 2014)
+      spikeRegs = zeros(numTRs, length(badTRs));
+      for bti = 1:length(badTRs)
+          spikeRegs(badTRs(bti), bti) = 1;
+          regressors = cat(2,regressors,{sprintf('censorTR%i', badTRs(bti))});
+      end
+      XX = [XX, spikeRegs];
    end
     
 end

@@ -1,8 +1,8 @@
-%% function X = makeDesignMatrix(numCond, numTR, lengthHRF, eventSequence, doPlot)
+%% function X = makeDesignMatrix(eventSequence, conds, lengthHRF, doPlot)
 % Make a design matrix for event-related fMRI analysis 
 % 
 % Inputs: 
-% - eventSequence: a Tx1 vector of integers that describes which conditions
+% - eventSequence: a Tx1 (or 1xT) vector of integers that describes which conditions
 %   were on at which time points. T is the total number of TRs in the scan
 % - conds: a vector of integers specifying which event types to pull out of eventSequence. 
 %   Simple case: if you have 3 conditions in eventSequence, then conds = 1:3. 
@@ -22,13 +22,17 @@
 
 function X = makeDesignMatrix(eventSequence, conds, lengthHRF, doPlot)
 
+if nargin<4
+    doPlot = false;
+end
+
 X = []; 
 
 numTR = length(eventSequence);
 
 for j=conds
     Xj = zeros(numTR,lengthHRF);
-    temp = eventSequence == j;
+    temp = eventSequence(:) == j; %(:) makes it a column, whatever the input orientation
     
     for i=1:lengthHRF
         Xj(:,i) = temp;

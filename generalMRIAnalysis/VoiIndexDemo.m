@@ -20,8 +20,8 @@ linearFuncIs = linearFuncIs{1};
 regressorNum = 2; 
 
 %first pull out all beta weights for that regressor
-thisRegBetas = squeeze(res.modelmd{2}(:,:,:,regi));
+thisRegBetas = squeeze(res.modelmd{2}(:,:,:,regressorNum));
 
 %Then average over verage over voxels with the indices corresponding to the ROI 
-betas(reti,stimROI,regi,di) = mean(thisRegBetas(linearFuncIs));
+roiMeanBeta = mean(thisRegBetas(linearFuncIs));
 

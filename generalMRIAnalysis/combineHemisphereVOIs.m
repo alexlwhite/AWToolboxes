@@ -77,5 +77,8 @@ end
 
 %write last line: 
 fprintf(fidNew,'\nNrOfVOIVTCs: 0');
+
+%% close txt files
+fclose(fid1); fclose(fid2); fclose(fidNew);
     
     

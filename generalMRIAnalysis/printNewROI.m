@@ -1,15 +1,16 @@
-%% function combinedFile = printNewROI(exampleFile,newName,folder,newVoxels)
+%% function fidNew = printNewROI(exampleFile,newFolder,newName,newVoxels)
 % prints text file in VOI format for BrainVoyager 
 % 
 % Inputs: 
 % - exampleFile: the name of another VOI text file from which header
 % information can be loaded and copied 
 % - newFolder: name of directory into which to put the new voi text file
-% - newFile:  name of new text file to write out 
+% - newName:  name of new text file to write out 
 % - newVoxels: a Nx3 matrix containing anatomical coordinates of N voxels in the ROI
 % 
 % OutputS: 
 % fidNew: handle of new text file. Will be -1 if failed to open file. 
+%   (The new file is left open; close it with fclose(fidNew) when done.)
 
 function fidNew = printNewROI(exampleFile,newFolder,newName,newVoxels)
 
@@ -30,6 +31,7 @@ fid1 = fopen(exampleFile,'r');
 
 frmt = '%s';
 C1 = textscan(fid1,frmt,nElements);
+fclose(fid1);
 
 
 %open new file 
