@@ -81,7 +81,11 @@ end
 
 if ~isfield(opt,'ylims')
     if ~isempty(eb)
-        drng = [min([min(ds(:)) min(eb(:))]) max([max(ds(:)) max(eb(:))])];
+        if numel(eb)==numel(ds) %symmetric error bars: eb are +/- amounts around ds
+            drng = [min(ds(:)-abs(eb(:))) max(ds(:)+abs(eb(:)))];
+        else %asymmetric: eb contains the lower and upper bounds
+            drng = [min([min(ds(:)) min(eb(:))]) max([max(ds(:)) max(eb(:))])];
+        end
     else
         drng = [min(ds(:)) max(ds(:))];
     end
