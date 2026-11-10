@@ -1,5 +1,7 @@
-function result = readEyelinkData(fname, deleteASC)
-% result = readEyelinkData(fname, deleteASC)
+function result = readEyelinkData(fname, deleteASC, automatic)
+% result = readEyelinkData(fname, deleteASC, automatic)
+% - automatic (optional, default false): if true, don't prompt about deleting
+%   void trials (they are kept). If false, you are asked whether to delete them.
 % Read an EDF file or an ASC file.
 % 1) If filename ends with '.edf' (case sensitive), run edf2asc - this needs to
 %    be on the path!
@@ -18,6 +20,7 @@ function result = readEyelinkData(fname, deleteASC)
 % readEDFASC.
 
 if ~exist('deleteASC','var'), deleteASC=0; end
+if ~exist('automatic','var'), automatic=false; end
 
 %% determine what type of file we're given (.edf or .asc)
 if fname(end-3)=='.'
@@ -206,12 +209,12 @@ while ~feof(fid) & pass
 end;
 
 function str=removeNonalphanumericChars(str)
-% Remove all characters that are not alphanumeric, . or _,  and remove
+% Remove all characters that are not alphanumeric or _,  and remove
 % any initial digits.
 % useful for making field names or variable names.
 i=1;
 while i<=length(str)
-    if any(str(i)=='_.') i=i+1;continue; end;
+    if str(i)=='_', i=i+1;continue; end %('.' is not allowed in struct field names)
     if str(i)<65 | (str(i)>90 & str(i)<97) | str(i)>122 ...
             | (i==1 & str(i)>47 & str(i)<58)
         str=[ str(1:i-1)  str(i+1:end) ];

@@ -76,8 +76,11 @@ smoothFalRs = zeros(size(dts));
 ratesCorrected = false(size(dts));
 ts = 1:length(dts);
 
+%kernelWidth is in ms; convert to samples for the Gaussian and causal kernels,
+%which are defined over sample indices ts
+kwSamp = kernelWidth/dT;
 if kernelType==3
-    alpha = 1/kernelWidth;
+    alpha = 1/kwSamp;
 end
 
 %smooth (temporally average) hit and false alarm rates 
@@ -89,10 +92,10 @@ for t=ts
         w(dts>=(dts(t)-kernelWidth/2) & dts<=(dts(t)+kernelWidth/2)) = 1; 
     %gaussian kernel     
     elseif kernelType==2
-        w=normpdf(ts,t,kernelWidth);
+        w=normpdf(ts,t,kwSamp);
     %'causal kernel'
     elseif kernelType==3
-        cts = t-ts+kernelWidth; %adding KernelWidth shifts the filter back in time so its peak is at t
+        cts = t-ts+kwSamp; %adding KernelWidth shifts the filter back in time so its peak is at t
         w=(alpha^2).*cts.*exp(-1*alpha*cts);
         w(w<0)=0;
     end

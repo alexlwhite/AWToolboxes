@@ -40,7 +40,7 @@ afterBlinkBuffer = 120; %ms after blink starts to consider cutting (eventually d
 minBuffer = 20;
 
 %whether to count NaN pupil size as a blink, or just 0. 
-countNaNPupilAsBlink = false 
+countNaNPupilAsBlink = false;
 
 maxYVelForCut = 0.5; % cutoff y-velocity in pix/ms to consider as when the eye starts or stops moving due to blink artifact 
 
@@ -216,7 +216,7 @@ if nBlinks>0
     end
     
     for bi = 1:nBlinks
-        if bi<nBlinks && blinkCutTimes(nBlinks,2)<time2
+        if bi<nBlinks
             noBlinkIntervals = [noBlinkIntervals; blinkCutTimes(bi,2)+1 blinkCutTimes(bi+1,1)-1];
         end
     end

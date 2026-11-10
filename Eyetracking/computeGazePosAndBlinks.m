@@ -67,6 +67,7 @@ maxBeforeBlinkBuffer = round(maxBeforeBlinkBuffer/msPerSample);
 maxAfterBlinkBuffer = round(maxAfterBlinkBuffer/msPerSample);
 minBeforeBuffer = round(minBeforeBuffer/msPerSample);
 minAfterBuffer = round(minAfterBuffer/msPerSample);
+minGapBtwnBlinks_ms = minGapBtwnBlinks; %keep a copy in ms, for comparison with timestamps
 minGapBtwnBlinks = round(minGapBtwnBlinks/msPerSample);
 
 eyeX = edf.Samples.posX(intime, :);
@@ -119,7 +120,7 @@ pupSz = edf.Samples.pupilSize(intime, :);
 %either insert a 0 or leave as NaN
 isBlink = any(pupSz <= 0, 2);
 if countNaNPupilAsBlink
-    isBlink = isBlink | isnan(pupSz);
+    isBlink = isBlink | any(isnan(pupSz),2); %any() so NaNs in either eye count (binocular data)
 else
     if any(isnan(pupSz))
         keyboard
@@ -405,7 +406,7 @@ if blinkCount>0
         if uniqueBlinkCount>0
             %if the start of this blink interval is later than the ending
             %of the previous one, separated by a min gap, then add a new blnk interval
-            if times(startCutT) > (blinkCutTimes(uniqueBlinkCount,2)+minGapBtwnBlinks)
+            if times(startCutT) > (blinkCutTimes(uniqueBlinkCount,2)+minGapBtwnBlinks_ms)
                 uniqueBlinkCount = uniqueBlinkCount+1;
                 blinkCutTimes(uniqueBlinkCount, :) = [times(startCutT) times(endCutT)];
                 addToTable = true;

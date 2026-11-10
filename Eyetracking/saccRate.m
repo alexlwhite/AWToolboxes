@@ -53,9 +53,15 @@ if isempty(count), count = zeros(size(rT)); end
 r = zeros(size(rT));
 ts = 1:length(rT);
 
+%kernelWidth is in ms; convert to samples for the Gaussian and causal kernels,
+%which are defined over sample indices ts
+kwSamp = kernelWidth/dT;
 if kernelType==3
-    alpha = 1/kernelWidth;
+    alpha = 1/kwSamp;
 end
+
+%timepoint closest to 0, for plotting
+[~, middleTI0] = min(abs(rT));
 
 %for all time points t, compute dot-product between event count vector and kernel w 
 for t=ts
@@ -65,10 +71,10 @@ for t=ts
         w(rT>=(rT(t)-kernelWidth/2) & rT<=(rT(t)+kernelWidth/2)) = 1; 
     %gaussian kernel     
     elseif kernelType==2
-        w = normpdf(ts,t,kernelWidth);
+        w = normpdf(ts,t,kwSamp);
     %'causal kernel'
     elseif kernelType==3
-        cts = t-ts+kernelWidth; %adding KernelWidth shifts the filter back in time so its peak is at t
+        cts = t-ts+kwSamp; %adding KernelWidth shifts the filter back in time so its peak is at t
         w = (alpha^2).*cts.*exp(-1*alpha*cts);
         w(w<0) = 0;
     end
@@ -79,7 +85,7 @@ for t=ts
     r(t) = count*w';
 
     %save w at timepoint closes to 0   
-    if doPlot && t==ts(rT==min(abs(rT)))
+    if doPlot && t==middleTI0
         middleW = w; 
         middleTI = t;
     end

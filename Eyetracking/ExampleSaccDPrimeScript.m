@@ -9,7 +9,7 @@ dT = 1; %number of ms between samples 
 %It also helps to know how wide the filter is at the base, for telling the code how to correct hit or false alarm rates that hit 0 or 1
 ts = 0:1:500;   t=250;
 alpha = 1/kernelWidth;               
-cts = t-ts+ip.kernelWidth; %adding KernelWidth shifts the filter back in time so its peak is at t
+cts = t-ts+kernelWidth; %adding KernelWidth shifts the filter back in time so its peak is at t
 w = (alpha^2).*cts.*exp(-1*alpha*cts);
 w(w<0) = 0;
 maxH = max(w);
