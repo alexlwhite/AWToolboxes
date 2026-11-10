@@ -34,7 +34,8 @@ if isvector(ds)
     end
 end
 
-if nargin<3 || ~exist('weights','var')
+doWeighted = ~(nargin<3 || ~exist('weights','var') || isempty(weights));
+if ~doWeighted
     weights = ones(1,size(ds, dim));
 elseif ~isvector(weights)
     error('weights must be a vector');
@@ -79,4 +80,14 @@ N = sum(~isnan(ds),dim);
 
 %the Standard Error of the Mean (SEM): 
 % The standard deviation (the square root of variance), divided by the square root of N. 
-SEM = sqrt(var(ds,weights,dim,'omitnan'))./sqrt(N);
+% Note: when var() is given a vector of weights, it normalizes by the sum
+% of the weights (i.e., by N: the population variance), not by N-1.
+% So we handle the unweighted and weighted cases separately:
+if ~doWeighted
+    % unweighted: the usual sample SD (normalized by N-1), as used by std() and ttest()
+    SEM = std(ds,0,dim,'omitnan')./sqrt(N);
+else
+    % weighted: apply the standard unbiased correction for normalized
+    % weights, 1/(1-sum(w.^2)), which reduces to N/(N-1) when all weights are equal
+    SEM = sqrt(var(ds,weights,dim,'omitnan')./(1-sum(weights.^2)))./sqrt(N);
+end
