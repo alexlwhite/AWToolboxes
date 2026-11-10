@@ -42,7 +42,7 @@ if isfield(dat,'trial')
 elseif isfield(dat,'t')
     nTrials = length(dat.t); 
 else %if no explicit trial counter, just take the first field
-    eval(sprintf('nTrials = length(dat.%s)',fs{1}));
+    eval(sprintf('nTrials = length(dat.%s);',fs{1}));
 end
 
 for t=1:nTrials
@@ -58,7 +58,7 @@ for t=1:nTrials
             
             if docell
                 try
-                    eval(sprintf('fprintf(df,''%%3f\t'',dat.%s{t}(s));',fs{f}));
+                    eval(sprintf('fprintf(df,''%%.3f\t'',dat.%s{t}(s));',fs{f}));
                 catch
                     eval(sprintf('thisdat = dat.%s{t};', fs{f}));
                     if isempty(thisdat) %If there's nothing in this cell, print an NaN. 
@@ -70,7 +70,7 @@ for t=1:nTrials
                 end
             else
                 try
-                    eval(sprintf('fprintf(df,''%%3f\t'',dat.%s(t));',fs{f}));
+                    eval(sprintf('fprintf(df,''%%.3f\t'',dat.%s(t));',fs{f}));
                 catch me
                     fprintf(1,'\nERROR in dataStructToTxt, with variable %s\n',fs{f});
                     keyboard
@@ -80,4 +80,7 @@ for t=1:nTrials
         fprintf(df,'\n');
     end
 end
+
+%close the text file
+fclose(df);
         

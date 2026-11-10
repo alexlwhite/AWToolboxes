@@ -1,6 +1,10 @@
 function hostname = getHostName(shorten)
 %December 8th, 2009: copied from MGL's initScreen
 
+if nargin<1
+    shorten = false;
+end
+
 
 [retval hostname] = system('hostname');
 % sometimes there is more than one line (errors from csh startup)
