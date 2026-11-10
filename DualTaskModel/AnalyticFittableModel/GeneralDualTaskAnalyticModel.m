@@ -1,3 +1,8 @@
+%% WORK IN PROGRESS -- NOT VALIDATED. Do not use for analyses yet.
+% (Known issues as of Nov 2026: a keyboard statement inside the main loop,
+% debugging output from missing semicolons, and the dual-task attention-state
+% weighting block checks modelType==2 although it is meant for the serial model.)
+
 %% [Ag, dualTaskAccCorr, AgValsByIndex] = GeneralDualTaskModel(modelType, attndStim1Mean, attndStim2Mean, pFlip2Side2, dualTaskAttnBias, extraCapacity)
 
     %July 7: SOMETHING IS TOTALLY BROKEN. NEED TO RESTRUCTURE. 

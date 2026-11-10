@@ -12,8 +12,9 @@
 % - singleDs: a 1x2 vector of d' levels esimated for side 1 and side 2 in
 %   the single-task (focused attention) condition 
 % - dualCrits: a 1x2 matrix of SDT criterion levels for side 1 and 2 in the
-%   dual-task condition. These are just norminv(FAR), where FAR is the false
-%   alarm rate. In other words, the distance of the criterion from 0. 
+%   dual-task condition. These are norminv(1-FAR), where FAR is the false
+%   alarm rate (i.e., the output "c" of computeDC). In other words, the 
+%   position of the criterion relative to 0, the mean of the target-absent distribution. 
 %   We may also just assume the criterion is neutral. If so switch
 %   assumeNeutralCriterion to "true" in the 1st line of the function. 
 % - serialBias: a single number, in the range 0-1, that is the estimated proportion of dual-task trials when side 1 is
