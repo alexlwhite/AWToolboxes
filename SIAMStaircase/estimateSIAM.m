@@ -78,7 +78,6 @@ elseif threshType == 2 %threshold is median of all intensities except after reve
     trialsCounted = length(tsToCount);
     
 else
-    fprintf(1,'\n\n(estimateSIAM) Error: threshType should be 1 (for reversal values) or 2 (for all intensity values)\n\n');
-    return;
+    error('(estimateSIAM) threshType should be 1 (for reversal values) or 2 (for all intensity values)');
 end
 

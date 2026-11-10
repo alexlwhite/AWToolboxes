@@ -38,7 +38,7 @@ stair.ss = updateSIAM(stair.ss,targPres,chosenRes);
 if stair.terminateByReversalCount
     stairDone = stair.ss.nRevStableSteps>=stair.nRevToStop;
 else
-    stairTone = trialNum > totalTrials;
+    stairDone = trialNum > totalTrials;
 end
 
 %% At the end of experiment, estimate threshold 

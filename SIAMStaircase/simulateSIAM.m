@@ -127,7 +127,7 @@ for simi = 1:nSim
         ss = updateSIAM(ss,pres,resp); 
     end
     
-    %estimate threshold as median of all intensities after the first five reversals
+    %estimate threshold (threshType=1: mean of intensities at reversals with stable step size)
     threshs(simi) = estimateSIAM(ss,threshType);
 
     totalNTs(simi)= ss.tnum; 
