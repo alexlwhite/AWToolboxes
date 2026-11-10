@@ -357,7 +357,7 @@ else
     % Divides data points into vertical "bands". Dots of the same condition in 
     % the same band get shifted horizontally relative to each other.
     [~, edges] = histcounts(allPts, opt.nVertBands);
-    edges(end) = edges(end)*1.001; % Nudge the last edge up slightly to avoid edge indexing exclusions
+    edges(end) = edges(end) + 0.001*(edges(end)-edges(1)); % Nudge the last edge up slightly to avoid edge indexing exclusions (works for negative values too)
     
     % Figure out the max number of points falling into any single vertical band
     maxN = 0;
@@ -431,11 +431,13 @@ handles = zeros(n1,n2);
 for i1 = 1:n1
     for i2 = 1:n2
         % Plot individual data points (Dots)
-        hdot = plot(allX{i1, i2}, ds{i1, i2}, opt.symbols{i1,i2}, 'MarkerEdgeColor', squeeze(opt.edgeColors(i1,i2,:))', 'MarkerFaceColor', squeeze(opt.fillColors(i1,i2,:))', 'MarkerSize', opt.markSz, 'LineWidth', opt.markEdgeLineWidth);
-
         if isfield(opt, 'dotFaceAlpha')
-            hdot.MarkerFaceAlpha = opt.dotFaceAlpha;
-        end        
+            % Line objects don't support marker transparency, so use scatter.
+            % (scatter marker size is an area in points^2, so square markSz)
+            hdot = scatter(allX{i1, i2}, ds{i1, i2}, opt.markSz^2, opt.symbols{i1,i2}, 'MarkerEdgeColor', squeeze(opt.edgeColors(i1,i2,:))', 'MarkerFaceColor', squeeze(opt.fillColors(i1,i2,:))', 'LineWidth', opt.markEdgeLineWidth, 'MarkerFaceAlpha', opt.dotFaceAlpha);
+        else
+            hdot = plot(allX{i1, i2}, ds{i1, i2}, opt.symbols{i1,i2}, 'MarkerEdgeColor', squeeze(opt.edgeColors(i1,i2,:))', 'MarkerFaceColor', squeeze(opt.fillColors(i1,i2,:))', 'MarkerSize', opt.markSz, 'LineWidth', opt.markEdgeLineWidth);
+        end
         
         % Plot means
         if strcmp(opt.meanSymbol, '-')
