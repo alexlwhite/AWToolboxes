@@ -30,7 +30,14 @@ fprintf(sf, '\n');
 
 
 if printANOVA
-    anv = lme.anova;
+    %anv = lme.anova;
+    %corretion: use Satterwaite method to calculate degrees of freedom,
+    %which is usually more conservative and better than the defaul Residual DF
+    try
+        anv = anova(lme, "DFMethod",'satterthwaite'); 
+    catch %but for some models, sattwerhwaite is not available, so just do the default: 
+        anv = anova(lme);
+    end
     fprintf(sf,'\nANOVA');
     fprintf(sf,'\nFactor\tF\tDF1\tDF2\tp');
     for ci=1:length(anv.Term)
