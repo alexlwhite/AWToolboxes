@@ -1,4 +1,5 @@
 %% Example script to use AWToolbox's barPlot_AW function 
+clear;
 
 %make up some data
 
@@ -9,6 +10,7 @@ Ms = [0.6 0.7;
 
 %standard errors: a 3x2 matrix
 Es = randn(size(Ms))*0.1;
+
 
 %set options for plot
 opt.ylims = [0.33 1]; %y axis limits

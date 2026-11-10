@@ -33,7 +33,7 @@
 %    legendLoc
 %    
      
-function barPlot_AW(ds, eb, opt)
+function barPlot_AW_old(ds, eb, opt)
 
 if ~isfield(opt,'barWidth')
     opt.barWidth = 0.2;

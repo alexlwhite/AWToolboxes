@@ -17,6 +17,7 @@ opt.yLab = 'madeup';
 opt.symmetricErrorBar = false;
 opt.errorBarCI = 95;
 opt.legendLabs = {'XY','YZ'};
+opt.dotFaceAlpha = 0.5;
 
 c1 = hsv2rgb([0.3 0.6 0.9]);
 c2 = hsv2rgb([0.3 0.8 0.5]);
@@ -50,30 +51,30 @@ jitSD = std(jitts, 0, 1);
 
 maxSD1 = max(abs(jitSD))
 
-
-
-figure; hold on;
-
-c1 = hsv2rgb([0.7 0.6 0.8]);
-c2 = hsv2rgb([0.7 0.8 0.5]);
-c3 = hsv2rgb([0.7 1.0 0.3]);
-
-opt.fillColors = ones(s1,s2,3);
-
-l2colrs = [c1; c2];
-opt.edgeColors = repmat(reshape(l2colrs,[1 s2 3]), s1);
-
-[barCenters, opt, allX] = clusterPlot_Gemini4(data, opt);
-
-%check differences between each subject's jitters
-jitts2 = NaN(s1*s2, N);
-cc = 0;
-for i1 = 1:s1
-    for i2=1:s2
-        cc = cc+1;
-        jitts2(cc, :) = allX{i1, i2, :} - barCenters(i1, i2);
-    end
-end
-
-jitSD2 = std(jitts2, 0, 1);
-maxSD2 = max(abs(jitSD2))
+% 
+% 
+% figure; hold on;
+% 
+% c1 = hsv2rgb([0.7 0.6 0.8]);
+% c2 = hsv2rgb([0.7 0.8 0.5]);
+% c3 = hsv2rgb([0.7 1.0 0.3]);
+% 
+% opt.fillColors = ones(s1,s2,3);
+% 
+% l2colrs = [c1; c2];
+% opt.edgeColors = repmat(reshape(l2colrs,[1 s2 3]), s1);
+% 
+% [barCenters, opt, allX] = clusterPlot_Gemini4(data, opt);
+% 
+% %check differences between each subject's jitters
+% jitts2 = NaN(s1*s2, N);
+% cc = 0;
+% for i1 = 1:s1
+%     for i2=1:s2
+%         cc = cc+1;
+%         jitts2(cc, :) = allX{i1, i2, :} - barCenters(i1, i2);
+%     end
+% end
+% 
+% jitSD2 = std(jitts2, 0, 1);
+% maxSD2 = max(abs(jitSD2))

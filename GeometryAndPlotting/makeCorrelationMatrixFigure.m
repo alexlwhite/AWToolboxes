@@ -49,12 +49,19 @@ end
 
 % % add a special color for NaN correlations 
 nanColr = [1 1 1];
-nanRho = -maxR-0.1;
-
+cLims = [minR maxR];
 
 emptyCells = isnan(rhos);
+rhosImg = rhos; %values used only for choosing cell colors (text labels still use rhos)
 if any(emptyCells(:))
-    rhos(emptyCells) = nanRho;
+    %extend the lower color limit by exactly one colormap bin, which gets the
+    %NaN color. That way real correlations near minR are not also drawn in the NaN color.
+    binW = (maxR-minR)/size(myColrs,1);
+    cLims(1) = minR - binW;
+    %real correlations at or below minR must get the lowest REAL color, not
+    %the NaN color, so (for drawing only) nudge them to just above minR
+    rhosImg(~emptyCells) = max(rhosImg(~emptyCells), minR + binW*1e-3);
+    rhosImg(emptyCells) = minR - binW/2;
     myColrs = [nanColr; myColrs];
 end
 
@@ -69,7 +76,7 @@ end
 
 %% make figure -- oddly typing "hold on" before the imagesc command flips the dimensions! 
 
-imagesc(rhos,[minR maxR]);
+imagesc(rhosImg,cLims);
 colormap(myColrs);
 if addColorBar, colorbar; end
 
@@ -107,7 +114,7 @@ xlim([0.5 nX+0.5]);
 ylim([0.5 nY+0.5]);
 
 set(gca, 'XTick', 1:nX); % center x-axis ticks on bins
-set(gca, 'YTick', 1:nX); % center y-axis ticks on bins
+set(gca, 'YTick', 1:nY); % center y-axis ticks on bins
 set(gca, 'XTickLabel', xLabs,'XAxisLocation','Top'); % set x-axis labels
 %xtickangle(45);
 set(gca, 'YTickLabel', yLabs); % set y-axis labels

@@ -57,10 +57,10 @@ for ki=1:2 %channel
         theseRs     = T.resp(strcmp(T.channel,channelNames{ki}) & strcmp(T.cue, cueNames{ci}));
         rs(ki,ci,:) = theseRs;
         mrs(ki,ci)  = nanmean(theseRs);
-        sems(ki,ci) = standardError(theseRs');
+        sems(ki,ci) = standardError_old(theseRs');
     end
     cueEffects(ki,:)   = squeeze(diff(rs(ki,:,:),1,2));
-    cueCIs(ki,1,:)     = boyntonBootstrap(@nanmean,cueEffects(ki,:),1000,95);
+    cueCIs(ki,1,:)     = boyntonBootstrap_old(@nanmean,cueEffects(ki,:),1000,95);
 end
 
 %bar plot
@@ -72,7 +72,7 @@ opt.ylims      = [-0.1 1];
 opt.doLegend   = true;
 opt.legendLabs = cueNames;
 figure; subplot(2,1,1); hold on;
-barPlot_AW(mrs,sems,opt);
+barPlot_AW_old(mrs,sems,opt);
 title('Mean channel responses +/- SEM');
 
 opt.doLegend = false;
@@ -83,7 +83,7 @@ opt.errorBarColors(1,1,:) = [0 0 0];
 opt.errorBarColors(2,1,:) = [0 0 0];
 opt.yLab = sprintf('%s - %s', cueNames{2},cueNames{1});
 subplot(2,1,2); hold on;
-barPlot_AW(mean(cueEffects,2), cueCIs, opt);
+barPlot_AW_old(mean(cueEffects,2), cueCIs, opt);
 title('Mean cue effects w/ 95% CIs');
 
 %% Try an LME model on each channel individually 

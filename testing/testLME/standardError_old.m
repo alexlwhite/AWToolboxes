@@ -14,7 +14,7 @@
 % by Alex White, 2018, at the University of Washington. 
 % 
 
-function SEM = standardError(ds,dim) 
+function SEM = standardError_old(ds,dim) 
 
 if nargin<2 || ~exist('dim','var')
     dim = ndims(ds);

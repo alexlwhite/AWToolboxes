@@ -1,4 +1,4 @@
-function [CI,sampleStat,bootstrapStat] = boyntonBootstrap(myStatistic,x,nReps,CIrange,BCFlag)
+function [CI,sampleStat,bootstrapStat] = boyntonBootstrap_old(myStatistic,x,nReps,CIrange,BCFlag)
 % [CI,sampleStat] = bootstrap(myStatistic,x,[nReps],[CIrange],[BCFlag])
 %
 % Calculates a confidence interval on the statistic (function handle
