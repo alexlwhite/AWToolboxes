@@ -3,7 +3,7 @@
 % Bootstrap the difference between two correlations 
 % Inputs
 % - ds: a NxM matrix of values. N is the number of observations in each condition, and there are M conditions. 
-%  The idea is to to coompre how well 2 columns in ds correlates with two
+%  The idea is to to compare how well 2 columns in ds correlates with two
 %  other columns in ds. So M must be >2. 
 %- pairsToComp: a 2x2 matrix, indicating the column numbers for
 %correlations to compare. 
